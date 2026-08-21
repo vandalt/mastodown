@@ -1,6 +1,7 @@
 # Python-generated files
 __pycache__/
 *.py[oc]
+src/mastho/_version.py
 build/
 dist/
 wheels/
