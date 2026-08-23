@@ -40,13 +40,16 @@ def query_obs(
     # Then we get all data products associated with the observations
     products_tbl = Observations.get_product_list(obs_tbl)
 
-    # %%
     # Then filter to keep science and/or auxiliary, pick the calib level and extension
+    filters = {
+        "productType": product_type,
+        "calib_level": calib_level,
+        "extension": extension,
+    }
+    filters = {k: v for k, v in filters.items() if v is not None}
     products_df = Observations.filter_products(
         products_tbl,
-        productType=product_type,
-        calib_level=calib_level,
-        extension=extension,
+        **filters,
     ).to_pandas()
 
     if not keep_ta:
