@@ -7,10 +7,15 @@ authors = [
     { name = "Thomas Vandal", email = "thomas.vandal@umontreal.ca" }
 ]
 requires-python = ">=3.14"
-dependencies = []
+dependencies = ["astroquery", "pandas"]
+
+[dependency-groups]
+dev = [
+    "ipython",
+]
 
 [project.scripts]
-mastho = "mastho:main"
+mastho = "mastho.cli:main"
 
 [build-system]
 requires = ["hatchling", "hatch-vcs"]
