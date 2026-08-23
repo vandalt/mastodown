@@ -46,7 +46,7 @@ def check_manifest(products: DataFrame, manifest: DataFrame, overwrite: bool = F
         manifest = update_manifest(manifest, products_not_manifest_on_disk)
 
     if overwrite and products_on_disk.any():
-        n_on_disk = len(products_on_disk)
+        n_on_disk = products_on_disk.sum()
         print(
             f"Overwrite is enabled. {n_on_disk} files already on disk will be re-downloaded."
         )
