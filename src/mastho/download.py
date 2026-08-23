@@ -51,7 +51,6 @@ def check_manifest(products: DataFrame, manifest: DataFrame, overwrite: bool = F
             f"Overwrite is enabled. {n_on_disk} files already on disk will be re-downloaded."
         )
     products_to_download = products[~products_on_disk | overwrite]
-    manifest = update_manifest(manifest, products_to_download)
 
     return products_to_download, manifest
 
@@ -92,8 +91,14 @@ def download_products(
     num_files = len(products_to_download)
     print(f"Will download {num_files} data products")
 
-    for i, product in products.iterrows():
-        download_product(product, overwrite=overwrite, dry_run=dry_run)
+    successful_indices = []
+    for index, product in products_to_download.iterrows():
+        if download_product(product, overwrite=overwrite, dry_run=dry_run):
+            successful_indices.append(index)
+    if successful_indices:
+        manifest = update_manifest(
+            manifest, products_to_download.loc[successful_indices]
+        )
 
     if not dry_run:
         manifest.to_csv(manifest_path, index=False)
@@ -102,21 +107,19 @@ def download_products(
 
 def download_product(
     product: Series | Row, overwrite: bool = False, dry_run: bool = False
-):
+) -> bool:
     local_path = Path(product.local_path)
     # TODO: Uniform/flexible keys for mission
     if local_path.exists() and not overwrite:
-        print(
-            f"File {local_path} already exists, skipping download and not adding to manifest"
-        )
-        return
+        print(f"File {local_path} already exists, skipping download")
+        return True
     elif local_path.exists() and overwrite:
         print(f"Overwriting existing file: {local_path}")
     else:
         print(f"Downloading file: {local_path}")
 
     if dry_run:
-        return
+        return True
 
     local_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -126,3 +129,6 @@ def download_product(
     )
     if status != "COMPLETE":
         print(f"Download failed for product {local_path} with status {status}: {msg}")
+        return False
+
+    return True
