@@ -1,3 +1,4 @@
+from astroquery.exceptions import InvalidQueryError
 from astroquery.mast import MastMissions, Observations
 from pandas import DataFrame
 
@@ -11,8 +12,14 @@ def query_obs(
     verbose: bool = False,
 ) -> DataFrame:
     # Get observation table that will contain only level 3 (i2d) data
+    criteria = {"proposal_id": programs}
+    criteria = {k: v for k, v in criteria.items() if v is not None}
+    if len(criteria) == 0:
+        raise InvalidQueryError(
+            "At least one non-positional criterion must be supplied."
+        )
     obs_tbl = Observations.query_criteria(
-        proposal_id=programs,
+        **criteria,
         project="JWST",
         # TODO: Decide if keep or remove
         # instrument_name=["NIRISS/IMAGE", "NIRCAM/IMAGE"],
@@ -53,14 +60,16 @@ def query_obs(
         metadata_img = metadata.query("exp_type not in ['NIS_TACQ', 'NIS_TACONFIRM']")
 
         non_ta_files = tuple(metadata_img.fileSetName)  # noqa: F841
-        products_df = products_df.query("obs_id.str.startswith(@non_ta_files)").reset_index(
-            drop=True
-        )
+        products_df = products_df.query(
+            "obs_id.str.startswith(@non_ta_files)"
+        ).reset_index(drop=True)
 
     if verbose:
         # Print final data before download
         total_size = sum(products_df["size"]) / 1e9
         num_files = len(products_df)
-        print(f"Final list contains {num_files} files with total size {total_size:.2f} GB")
+        print(
+            f"Final list contains {num_files} files with total size {total_size:.2f} GB"
+        )
 
     return products_df
