@@ -1,13 +1,77 @@
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
 
 from astroquery.mast import Observations
+from pandas import DataFrame
 
+from mastho.download import download_products
 from mastho.query import query_obs
 
 
 def get_meta() -> None:
     """Print metadata for all MAST observation columns."""
     Observations.get_metadata("observations").pprint(max_lines=-1)
+
+
+def add_query_arguments(parser: ArgumentParser, output_flags: tuple[str, ...]) -> None:
+    """Add query options to a command parser."""
+    parser.add_argument(
+        "--programs",
+        nargs="+",
+        help="Proposal IDs to query.",
+    )
+    parser.add_argument(
+        "--calib-level",
+        nargs="+",
+        type=int,
+        help="Calibration levels of products to include.",
+    )
+    parser.add_argument(
+        "--product-type",
+        nargs="+",
+        help="Product types to include.",
+    )
+    parser.add_argument(
+        "--extension",
+        nargs="+",
+        help="File extensions to include.",
+    )
+    parser.add_argument(
+        "--keep-ta",
+        action="store_true",
+        help="Keep target-acquisition observations.",
+    )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Print matching observations and product summary details.",
+    )
+    parser.add_argument(
+        *output_flags,
+        dest="query_output",
+        help="Write the resulting dataframe to this CSV path.",
+    )
+
+
+def run_query(args: Namespace) -> DataFrame:
+    """Query products, print the result, and optionally save it as CSV."""
+    products = query_obs(
+        programs=args.programs,
+        calib_level=args.calib_level,
+        product_type=args.product_type,
+        extension=args.extension,
+        keep_ta=args.keep_ta,
+        verbose=args.verbose,
+    )
+    print(products)
+    if args.query_output is not None:
+        products.to_csv(args.query_output, index=False)
+    return products
+
+
+def confirm_download(dry_run: bool = False) -> bool:
+    """Return whether the user confirms a download."""
+    dry_run_str = " (dry run, no modifications will happen on disk)" if dry_run else ""
+    return input(f"Continue with download{dry_run_str}? [Y/n] ").strip().lower() != "n"
 
 
 def main() -> None:
@@ -25,41 +89,37 @@ def main() -> None:
         "query",
         help="Query the MAST observations portal.",
     )
-    query_parser.add_argument(
-        "--programs",
-        nargs="+",
-        help="Proposal IDs to query.",
+    add_query_arguments(query_parser, ("-o", "--output"))
+    download_parser = subparsers.add_parser(
+        "download",
+        help="Query the MAST observations portal and download the matching products.",
     )
-    query_parser.add_argument(
-        "--calib-level",
-        nargs="+",
-        type=int,
-        help="Calibration levels of products to include.",
+    add_query_arguments(download_parser, ("--query-output",))
+    download_parser.add_argument(
+        "--download-dir",
+        help="Directory in which to save downloaded products.",
     )
-    query_parser.add_argument(
-        "--product-type",
-        nargs="+",
-        help="Product types to include.",
-    )
-    query_parser.add_argument(
-        "--extension",
-        nargs="+",
-        help="File extensions to include.",
-    )
-    query_parser.add_argument(
-        "--keep-ta",
+    download_parser.add_argument(
+        "--overwrite",
         action="store_true",
-        help="Keep target-acquisition observations.",
+        help="Download products even when they already exist.",
     )
-    query_parser.add_argument(
-        "--verbose",
+    download_parser.add_argument(
+        "--dry-run",
         action="store_true",
-        help="Print matching observations and product summary details.",
+        help="List planned downloads without writing files.",
     )
-    query_parser.add_argument(
-        "-o",
-        "--output",
-        help="Write the resulting dataframe to this CSV path.",
+    download_parser.add_argument(
+        "--no-proposal-subdir",
+        action="store_false",
+        dest="proposal_subdir",
+        help="Save products directly in the download directory.",
+    )
+    download_parser.add_argument(
+        "-y",
+        "--yes",
+        action="store_true",
+        help="Download without prompting for confirmation.",
     )
 
     args = parser.parse_args()
@@ -70,14 +130,16 @@ def main() -> None:
     if args.command == "get-meta":
         get_meta()
     elif args.command == "query":
-        products = query_obs(
-            programs=args.programs,
-            calib_level=args.calib_level,
-            product_type=args.product_type,
-            extension=args.extension,
-            keep_ta=args.keep_ta,
-            verbose=args.verbose,
-        )
-        print(products)
-        if args.output is not None:
-            products.to_csv(args.output, index=False)
+        run_query(args)
+    elif args.command == "download":
+        products = run_query(args)
+        if args.yes or confirm_download(dry_run=args.dry_run):
+            download_products(
+                products,
+                download_dir=args.download_dir,
+                proposal_subdir=args.proposal_subdir,
+                overwrite=args.overwrite,
+                dry_run=args.dry_run,
+            )
+        else:
+            print("Download cancelled.")

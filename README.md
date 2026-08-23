@@ -19,3 +19,14 @@ mastho query --programs 01200 02473 --calib-level 1 --product-type SCIENCE --ext
 
 Filter options accept one or more space-separated values. Use `--keep-ta` to retain
 target-acquisition observations and `--verbose` to print observation details.
+
+Query products and download them after confirmation:
+
+```console
+mastho download --programs 01200 02473 --download-dir data --dry-run
+```
+
+The download command prompts after showing the query result; press Enter to continue,
+enter `n` to cancel, or pass `-y` / `--yes` to skip the prompt. Use
+`--query-output products.csv` to save the query result, and
+`--no-proposal-subdir` to save files directly in the download directory.

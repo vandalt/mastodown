@@ -71,3 +71,95 @@ class QueryCommandTests(TestCase):
             main()
 
         products.to_csv.assert_not_called()
+
+
+class DownloadCommandTests(TestCase):
+    def test_download_forwards_options_and_skips_prompt_with_yes(self):
+        products = Mock()
+
+        with (
+            patch("mastho.cli.query_obs", return_value=products) as query,
+            patch("mastho.cli.download_products") as download,
+            patch("builtins.input") as prompt,
+            patch(
+                "sys.argv",
+                [
+                    "mastho",
+                    "download",
+                    "--programs",
+                    "01200",
+                    "02473",
+                    "--calib-level",
+                    "1",
+                    "--product-type",
+                    "SCIENCE",
+                    "--extension",
+                    "fits",
+                    "--keep-ta",
+                    "--verbose",
+                    "--query-output",
+                    "products.csv",
+                    "--download-dir",
+                    "data",
+                    "--overwrite",
+                    "--dry-run",
+                    "--no-proposal-subdir",
+                    "--yes",
+                ],
+            ),
+            redirect_stdout(StringIO()),
+        ):
+            main()
+
+        query.assert_called_once_with(
+            programs=["01200", "02473"],
+            calib_level=[1],
+            product_type=["SCIENCE"],
+            extension=["fits"],
+            keep_ta=True,
+            verbose=True,
+        )
+        products.to_csv.assert_called_once_with("products.csv", index=False)
+        download.assert_called_once_with(
+            products,
+            download_dir="data",
+            proposal_subdir=False,
+            overwrite=True,
+            dry_run=True,
+        )
+        prompt.assert_not_called()
+
+    def test_download_proceeds_when_confirmation_is_empty(self):
+        products = Mock()
+
+        with (
+            patch("mastho.cli.query_obs", return_value=products),
+            patch("mastho.cli.download_products") as download,
+            patch("builtins.input", return_value=""),
+            patch("sys.argv", ["mastho", "download"]),
+            redirect_stdout(StringIO()),
+        ):
+            main()
+
+        download.assert_called_once_with(
+            products,
+            download_dir=None,
+            proposal_subdir=True,
+            overwrite=False,
+            dry_run=False,
+        )
+
+    def test_download_cancels_when_confirmation_is_no(self):
+        products = Mock()
+
+        with (
+            patch("mastho.cli.query_obs", return_value=products),
+            patch("mastho.cli.download_products") as download,
+            patch("builtins.input", return_value="n"),
+            patch("sys.argv", ["mastho", "download"]),
+            redirect_stdout(StringIO()) as output,
+        ):
+            main()
+
+        download.assert_not_called()
+        self.assertIn("Download cancelled.", output.getvalue())
