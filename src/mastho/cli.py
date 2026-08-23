@@ -36,6 +36,22 @@ def add_query_arguments(parser: ArgumentParser, output_flags: tuple[str, ...]) -
         help="File extensions to include.",
     )
     parser.add_argument(
+        "--filters",
+        nargs="+",
+        help="MAST instrument filters to include.",
+    )
+    parser.add_argument(
+        "--date-range",
+        nargs=2,
+        metavar=("START_DATE", "END_DATE"),
+        help="Inclusive observation dates in YYYY-MM-DD format.",
+    )
+    parser.add_argument(
+        "--max-entries",
+        type=int,
+        help="Maximum number of observations to return.",
+    )
+    parser.add_argument(
         "--keep-ta",
         action="store_true",
         help="Keep target-acquisition observations.",
@@ -59,6 +75,10 @@ def run_query(args: Namespace) -> DataFrame:
         calib_level=args.calib_level,
         product_type=args.product_type,
         extension=args.extension,
+        filters=args.filters,
+        start_date=args.date_range[0] if args.date_range is not None else None,
+        end_date=args.date_range[1] if args.date_range is not None else None,
+        max_entries=args.max_entries,
         keep_ta=args.keep_ta,
         verbose=args.verbose,
     )

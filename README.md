@@ -19,6 +19,9 @@ mastho query --programs 01200 02473 --calib-level 1 --product-type SCIENCE --ext
 
 Filter options accept one or more space-separated values. Use `--keep-ta` to retain
 target-acquisition observations and `--verbose` to print observation details.
+Use `--filters` for MAST instrument filters, `--date-range START_DATE END_DATE` for
+inclusive `YYYY-MM-DD` observation dates, and `--max-entries` to limit the returned
+observations.
 
 Query products and download them after confirmation:
 

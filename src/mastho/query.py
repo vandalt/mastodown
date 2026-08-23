@@ -1,6 +1,20 @@
+from datetime import datetime, timedelta
+
+from astropy.time import Time
 from astroquery.exceptions import InvalidQueryError
 from astroquery.mast import MastMissions, Observations
 from pandas import DataFrame
+
+
+def parse_date(date_string: str) -> datetime:
+    """Parse a YYYY-MM-DD date string."""
+    try:
+        date = datetime.strptime(date_string, "%Y-%m-%d")  # noqa: DTZ007
+    except ValueError as error:
+        raise ValueError(f"Date must use YYYY-MM-DD format: {date_string}") from error
+    if date.strftime("%Y-%m-%d") != date_string:
+        raise ValueError(f"Date must use YYYY-MM-DD format: {date_string}")
+    return date
 
 
 def query_obs(
@@ -8,23 +22,34 @@ def query_obs(
     calib_level: list[int] | int | None = None,
     product_type: list[str] | str | None = None,
     extension: list[str] | str | None = None,
+    filters: list[str] | str | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
+    max_entries: int | None = None,
     keep_ta: bool = False,
     verbose: bool = False,
 ) -> DataFrame:
     # Get observation table that will contain only level 3 (i2d) data
-    criteria = {"proposal_id": programs}
+    if (start_date is None) != (end_date is None):
+        raise ValueError("start_date and end_date must be specified together.")
+    if max_entries is not None and max_entries <= 0:
+        raise ValueError("max_entries must be greater than zero.")
+
+    criteria = {"proposal_id": programs, "filters": filters}
+    if start_date is not None and end_date is not None:
+        start = parse_date(start_date)
+        end = parse_date(end_date)
+        if end < start:
+            raise ValueError("end_date must not be earlier than start_date.")
+        criteria["t_min"] = [Time(start).mjd, Time(end + timedelta(days=1)).mjd]
     criteria = {k: v for k, v in criteria.items() if v is not None}
     if len(criteria) == 0:
         raise InvalidQueryError(
             "At least one non-positional criterion must be supplied."
         )
-    obs_tbl = Observations.query_criteria(
-        **criteria,
-        project="JWST",
-        # TODO: Decide if keep or remove
-        # instrument_name=["NIRISS/IMAGE", "NIRCAM/IMAGE"],
-        # filters=["F480M", "F150W"],
-    )
+    if max_entries is not None:
+        criteria.update(pagesize=max_entries, page=1)
+    obs_tbl = Observations.query_criteria(**criteria, project="JWST")
 
     if verbose:
         display_columns = [
@@ -41,15 +66,15 @@ def query_obs(
     products_tbl = Observations.get_product_list(obs_tbl)
 
     # Then filter to keep science and/or auxiliary, pick the calib level and extension
-    filters = {
+    product_filters = {
         "productType": product_type,
         "calib_level": calib_level,
         "extension": extension,
     }
-    filters = {k: v for k, v in filters.items() if v is not None}
+    product_filters = {k: v for k, v in product_filters.items() if v is not None}
     products_df = Observations.filter_products(
         products_tbl,
-        **filters,
+        **product_filters,
     ).to_pandas()
 
     if not keep_ta:
