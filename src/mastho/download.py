@@ -1,6 +1,5 @@
 from pathlib import Path
 
-from astropy.table import Row
 from astroquery.mast import (
     Observations,
 )
@@ -10,19 +9,34 @@ PROG_ID_LEN = 5
 
 
 def update_manifest(manifest: DataFrame, new_products: DataFrame) -> DataFrame:
+    """Update the manifest dataframe with new data products
+
+    New data products have priority if there are duplicates
+
+    :param manifest: The manifest dataframe
+    :param new_products: The new data products to add
+    :return: The updated manifest
+    """
     manifest = concat([manifest, new_products], ignore_index=True).drop_duplicates(
         subset=["obs_id"], keep="last"
     )
     return manifest
 
 
-# 1. File in manifest:
-#     1. On disk -> good, do nothing unless ovewrite
-#     2. Not on disk -> report and download
-# 2. File not in manifest:
-#     1. On disk -> report and add to manifest
-#     2. Not on disk -> download normally
-def check_manifest(products: DataFrame, manifest: DataFrame, overwrite: bool = False):
+def check_manifest(products: DataFrame, manifest: DataFrame, overwrite: bool = False) -> tuple[DataFrame, DataFrame]:
+    """Check the products to download against the manifest
+
+    Some things to note:
+
+    - If ``overwrite`` is True, all products will be downloaded.
+    - If a file is in the manifest but missing on disk, it will be downloaded
+    - If a file is on disk but not in the manifest, it will be added to the manifest
+
+    :param products: Data products to download
+    :param manifest: Manifest dataframe
+    :param overwrite: Whether existing files should be overwritten
+    :return: The subset of ``products`` which should be downloaded
+    """
     products_on_disk = products["local_path"].apply(lambda x: x.exists())
     if not manifest.empty:
         products_in_manifest = products["obs_id"].isin(manifest["obs_id"])
@@ -34,6 +48,7 @@ def check_manifest(products: DataFrame, manifest: DataFrame, overwrite: bool = F
 
     n_missing_disk = len(products_in_manifest_not_disk)
     if n_missing_disk != 0:
+        # TODO: Use logging for all these warnings
         print(
             f"WARNING: There are {n_missing_disk} files in the manifest missing on disk. Downloading them."
         )
@@ -55,8 +70,6 @@ def check_manifest(products: DataFrame, manifest: DataFrame, overwrite: bool = F
     return products_to_download, manifest
 
 
-# TODO: Support table as well
-# TODO: Decide how to handle downlaod_dir/path
 def download_products(
     products: DataFrame,
     download_dir: Path | str | None = None,
@@ -64,6 +77,15 @@ def download_products(
     overwrite: bool = False,
     dry_run: bool = False,
 ):
+    """Download data products from mast
+
+    :param products: Dataframe of data products to download
+    :param download_dir: Parent download directory
+    :param proposal_subdir: Whether each proposal ID should have its
+                            subdirectory in ``download_dir``. Deults to True
+    :param overwrite: Whether existing files should be overwritten. Defaults to False
+    :param dry_run: Whether this is a dry-run where no I/O happens. Defaults to False
+    """
     products = products.copy()
 
     if download_dir is None:
@@ -99,15 +121,32 @@ def download_products(
         manifest = update_manifest(
             manifest, products_to_download.loc[successful_indices]
         )
+    n_success = len(successful_indices)
+    n_total = len(products_to_download)
+    if n_success < n_total:
+        print(
+            f"WARNING: Download failed for {n_total - n_success} out of {n_total} products"
+        )
+    print(f"Downloaded {n_success} data products")
 
     if not dry_run:
         manifest.to_csv(manifest_path, index=False)
         print(f"Saved manifest with {len(manifest)} data products to {manifest_path}")
 
 
+# TODO: Check the link to download_products
 def download_product(
-    product: Series | Row, overwrite: bool = False, dry_run: bool = False
+    product: Series, overwrite: bool = False, dry_run: bool = False
 ) -> bool:
+    """Download a single data product from MAST
+
+    Called by :func:`download_products`.
+
+    :param product: The info on the data product to download as a pandas series
+    :param overwrite: Whether existing files should be overwritten. Defaults to False
+    :param dry_run: Whether this is a dry-run where no I/O happens. Defaults to False
+    :return: True if the download was successful, False otherwise
+    """
     local_path = Path(product.local_path)
     # TODO: Uniform/flexible keys for mission
     if local_path.exists() and not overwrite:
