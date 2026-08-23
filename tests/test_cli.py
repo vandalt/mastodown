@@ -1,7 +1,8 @@
 from contextlib import redirect_stdout
 from io import StringIO
+from os import environ
 from unittest import TestCase
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, call, patch
 
 from pandas import DataFrame
 
@@ -9,6 +10,50 @@ from mastho.cli import main
 
 
 class QueryCommandTests(TestCase):
+    def test_query_auth_prompts_through_astroquery(self):
+        products = DataFrame({"productFilename": ["product.fits"]})
+        calls = Mock()
+
+        with (
+            patch("mastho.cli.Observations.login") as login,
+            patch("mastho.cli.query_obs", return_value=products) as query,
+            patch.dict(environ, {}, clear=True),
+            patch("sys.argv", ["mastho", "query", "--auth"]),
+            redirect_stdout(StringIO()),
+        ):
+            calls.attach_mock(login, "login")
+            calls.attach_mock(query, "query")
+            main()
+
+        login.assert_called_once_with()
+        query.assert_called_once()
+        self.assertEqual(calls.mock_calls, [call.login(), call.query(
+            programs=None,
+            calib_level=None,
+            product_type=None,
+            extension=None,
+            filters=None,
+            start_date=None,
+            end_date=None,
+            max_entries=None,
+            keep_ta=False,
+            verbose=False,
+        )])
+
+    def test_query_does_not_authenticate_without_token_or_flag(self):
+        products = DataFrame({"productFilename": ["product.fits"]})
+
+        with (
+            patch("mastho.cli.Observations.login") as login,
+            patch("mastho.cli.query_obs", return_value=products),
+            patch.dict(environ, {}, clear=True),
+            patch("sys.argv", ["mastho", "query"]),
+            redirect_stdout(StringIO()),
+        ):
+            main()
+
+        login.assert_not_called()
+
     def test_query_forwards_arguments_and_prints_products(self):
         products = DataFrame({"productFilename": ["product.fits"]})
 
@@ -86,6 +131,38 @@ class QueryCommandTests(TestCase):
 
 
 class DownloadCommandTests(TestCase):
+    def test_download_uses_environment_token_before_querying(self):
+        products = Mock()
+        calls = Mock()
+
+        with (
+            patch("mastho.cli.Observations.login") as login,
+            patch("mastho.cli.query_obs", return_value=products) as query,
+            patch("mastho.cli.download_products") as download,
+            patch.dict(environ, {"MAST_API_TOKEN": "token"}),
+            patch("sys.argv", ["mastho", "download", "--auth", "--yes"]),
+            redirect_stdout(StringIO()),
+        ):
+            calls.attach_mock(login, "login")
+            calls.attach_mock(query, "query")
+            main()
+
+        login.assert_called_once_with(token="token")
+        query.assert_called_once()
+        download.assert_called_once()
+        self.assertEqual(calls.mock_calls[:2], [call.login(token="token"), call.query(
+            programs=None,
+            calib_level=None,
+            product_type=None,
+            extension=None,
+            filters=None,
+            start_date=None,
+            end_date=None,
+            max_entries=None,
+            keep_ta=False,
+            verbose=False,
+        )])
+
     def test_download_forwards_options_and_skips_prompt_with_yes(self):
         products = Mock()
 

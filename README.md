@@ -33,3 +33,21 @@ The download command prompts after showing the query result; press Enter to cont
 enter `n` to cancel, or pass `-y` / `--yes` to skip the prompt. Use
 `--query-output products.csv` to save the query result, and
 `--no-proposal-subdir` to save files directly in the download directory.
+
+### Proprietary data
+
+Both `query` and `download` authenticate automatically when `MAST_API_TOKEN` is set:
+
+```console
+export MAST_API_TOKEN=your-mast-token
+mastho download --programs 01200
+```
+
+Alternatively, pass `--auth` to securely enter a token through Astroquery's prompt:
+
+```console
+mastho query --programs 01200 --auth
+```
+
+The environment token takes precedence over `--auth`. Do not pass tokens directly on
+the command line.

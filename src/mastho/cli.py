@@ -1,4 +1,5 @@
 from argparse import ArgumentParser, Namespace
+from os import environ
 
 from astroquery.mast import Observations
 from pandas import DataFrame
@@ -62,6 +63,11 @@ def add_query_arguments(parser: ArgumentParser, output_flags: tuple[str, ...]) -
         help="Print matching observations and product summary details.",
     )
     parser.add_argument(
+        "--auth",
+        action="store_true",
+        help="Prompt securely for a MAST API token when MAST_API_TOKEN is not set.",
+    )
+    parser.add_argument(
         *output_flags,
         dest="query_output",
         help="Write the resulting dataframe to this CSV path.",
@@ -92,6 +98,15 @@ def confirm_download(dry_run: bool = False) -> bool:
     """Return whether the user confirms a download."""
     dry_run_str = " (dry run, no modifications will happen on disk)" if dry_run else ""
     return input(f"Continue with download{dry_run_str}? [Y/n] ").strip().lower() != "n"
+
+
+def authenticate(args: Namespace) -> None:
+    """Authenticate with MAST from the environment or an interactive prompt."""
+    token = environ.get("MAST_API_TOKEN")
+    if token:
+        Observations.login(token=token)
+    elif args.auth:
+        Observations.login()
 
 
 def main() -> None:
@@ -150,8 +165,10 @@ def main() -> None:
     if args.command == "get-meta":
         get_meta()
     elif args.command == "query":
+        authenticate(args)
         run_query(args)
     elif args.command == "download":
+        authenticate(args)
         products = run_query(args)
         if args.yes or confirm_download(dry_run=args.dry_run):
             download_products(
