@@ -23,10 +23,11 @@ def update_manifest(manifest: DataFrame, new_products: DataFrame) -> DataFrame:
 #     1. On disk -> report and add to manifest
 #     2. Not on disk -> download normally
 def check_manifest(products: DataFrame, manifest: DataFrame, overwrite: bool = False):
-
-    # if existing_manifest.empty:
     products_on_disk = products["local_path"].apply(lambda x: x.exists())
-    products_in_manifest = products["obs_id"].isin(manifest["obs_id"])
+    if not manifest.empty:
+        products_in_manifest = products["obs_id"].isin(manifest["obs_id"])
+    else:
+        products_in_manifest = Series(False, index=products.index)
 
     products_in_manifest_not_disk = products[products_in_manifest & ~products_on_disk]
     products_not_manifest_on_disk = products[~products_in_manifest & products_on_disk]
