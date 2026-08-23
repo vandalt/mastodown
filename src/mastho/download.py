@@ -1,4 +1,5 @@
 from pathlib import Path
+from re import sub
 
 from astroquery.mast import (
     Observations,
@@ -6,6 +7,12 @@ from astroquery.mast import (
 from pandas import DataFrame, Series, concat, read_csv
 
 PROG_ID_LEN = 5
+
+
+def target_directory_name(target_name: str) -> str:
+    """Return a readable filesystem-safe directory name for a MAST target."""
+    directory_name = sub(r'[<>:"/\\|?*\x00-\x1f]+', "_", target_name).strip(" .")
+    return directory_name or "unknown-target"
 
 
 def update_manifest(manifest: DataFrame, new_products: DataFrame) -> DataFrame:
@@ -74,6 +81,7 @@ def download_products(
     products: DataFrame,
     download_dir: Path | str | None = None,
     proposal_subdir: bool = True,
+    target_subdir: bool = False,
     overwrite: bool = False,
     dry_run: bool = False,
 ):
@@ -83,6 +91,8 @@ def download_products(
     :param download_dir: Parent download directory
     :param proposal_subdir: Whether each proposal ID should have its
                             subdirectory in ``download_dir``. Deults to True
+    :param target_subdir: Whether each target name should have its subdirectory
+                          in the proposal or download directory. Defaults to False
     :param overwrite: Whether existing files should be overwritten. Defaults to False
     :param dry_run: Whether this is a dry-run where no I/O happens. Defaults to False
     """
@@ -95,6 +105,8 @@ def download_products(
         download_dirs = download_dir / products.proposal_id.str.zfill(PROG_ID_LEN)
     else:
         download_dirs = download_dir
+    if target_subdir:
+        download_dirs = download_dirs / products.target_name.map(target_directory_name)
     products["download_dir"] = download_dirs
     products["local_path"] = products["download_dir"] / products["productFilename"]
 

@@ -151,6 +151,11 @@ def main() -> None:
         help="Save products directly in the download directory.",
     )
     download_parser.add_argument(
+        "--target-subdir",
+        action="store_true",
+        help="Group downloaded products into target-name subdirectories.",
+    )
+    download_parser.add_argument(
         "-y",
         "--yes",
         action="store_true",
@@ -175,6 +180,7 @@ def main() -> None:
                 products,
                 download_dir=args.download_dir,
                 proposal_subdir=args.proposal_subdir,
+                target_subdir=args.target_subdir,
                 overwrite=args.overwrite,
                 dry_run=args.dry_run,
             )

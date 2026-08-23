@@ -193,6 +193,7 @@ class DownloadCommandTests(TestCase):
                     "--overwrite",
                     "--dry-run",
                     "--no-proposal-subdir",
+                    "--target-subdir",
                     "--yes",
                 ],
             ),
@@ -217,6 +218,7 @@ class DownloadCommandTests(TestCase):
             products,
             download_dir="data",
             proposal_subdir=False,
+            target_subdir=True,
             overwrite=True,
             dry_run=True,
         )
@@ -238,6 +240,7 @@ class DownloadCommandTests(TestCase):
             products,
             download_dir=None,
             proposal_subdir=True,
+            target_subdir=False,
             overwrite=False,
             dry_run=False,
         )

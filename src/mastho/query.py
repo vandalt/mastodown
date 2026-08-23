@@ -50,6 +50,11 @@ def query_obs(
     if max_entries is not None:
         criteria.update(pagesize=max_entries, page=1)
     obs_tbl = Observations.query_criteria(**criteria, project="JWST")
+    target_names = (
+        obs_tbl["obsid", "target_name"]
+        .to_pandas()
+        .drop_duplicates(subset=["obsid"])
+    )
 
     if verbose:
         display_columns = [
@@ -76,6 +81,15 @@ def query_obs(
         products_tbl,
         **product_filters,
     ).to_pandas()
+    products_df = products_df.drop(columns=["target_name"], errors="ignore").merge(
+        target_names,
+        left_on="parent_obsid",
+        right_on="obsid",
+        how="left",
+    ).drop(columns=["obsid"])
+    products_df = products_df[
+        ["target_name", *products_df.columns.drop("target_name")]
+    ]
 
     if not keep_ta:
         # We use the mission interface to drop TA observations

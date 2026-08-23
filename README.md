@@ -33,6 +33,8 @@ The download command prompts after showing the query result; press Enter to cont
 enter `n` to cancel, or pass `-y` / `--yes` to skip the prompt. Use
 `--query-output products.csv` to save the query result, and
 `--no-proposal-subdir` to save files directly in the download directory.
+`--target-subdir` to place each product under its target name, after the optional
+proposal directory.
 
 ### Proprietary data
 

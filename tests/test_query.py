@@ -2,6 +2,7 @@ from unittest import TestCase
 from unittest.mock import Mock, patch
 
 from astropy.time import Time
+from astropy.table import Table
 from pandas import DataFrame
 
 from mastho.query import query_obs
@@ -10,10 +11,14 @@ from mastho.query import query_obs
 class QueryObservationTests(TestCase):
     def test_query_uses_date_range_filters_and_max_entries(self):
         products = Mock()
-        products.to_pandas.return_value = DataFrame()
+        products.to_pandas.return_value = DataFrame({"parent_obsid": []})
+        observations = Table({"obsid": [], "target_name": []})
 
         with (
-            patch("mastho.query.Observations.query_criteria") as query,
+            patch(
+                "mastho.query.Observations.query_criteria",
+                return_value=observations,
+            ) as query,
             patch("mastho.query.Observations.get_product_list"),
             patch("mastho.query.Observations.filter_products", return_value=products),
         ):
@@ -34,6 +39,32 @@ class QueryObservationTests(TestCase):
             page=1,
             project="JWST",
         )
+
+    def test_query_includes_target_name_as_first_column(self):
+        observations = Table(
+            {"obsid": [123], "target_name": ["NGC 123"]}
+        )
+        products = Mock()
+        products.to_pandas.return_value = DataFrame(
+            {
+                "obs_id": ["observation-1"],
+                "parent_obsid": [123],
+                "productFilename": ["product.fits"],
+            }
+        )
+
+        with (
+            patch(
+                "mastho.query.Observations.query_criteria",
+                return_value=observations,
+            ),
+            patch("mastho.query.Observations.get_product_list"),
+            patch("mastho.query.Observations.filter_products", return_value=products),
+        ):
+            result = query_obs(programs=["01200"], keep_ta=True)
+
+        self.assertEqual(result.columns[0], "target_name")
+        self.assertEqual(result["target_name"].tolist(), ["NGC 123"])
 
     def test_query_rejects_invalid_date_range(self):
         with self.assertRaisesRegex(
