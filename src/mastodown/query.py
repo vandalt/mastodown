@@ -106,12 +106,11 @@ def query_obs(
             "obs_id.str.startswith(@non_ta_files)"
         ).reset_index(drop=True)
 
-    if verbose:
-        # Print final data before download
-        total_size = sum(products_df["size"]) / 1e9
-        num_files = len(products_df)
-        print(
-            f"Final list contains {num_files} files with total size {total_size:.2f} GB"
-        )
+    # Print final data before download
+    total_size = sum(products_df["size"]) / 1e9
+    num_files = len(products_df)
+    print(
+        f"Final list contains {num_files} files with total size {total_size:.2f} Gb"
+    )
 
     return products_df

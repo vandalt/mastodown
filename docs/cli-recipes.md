@@ -1,6 +1,8 @@
-# Command line interface
+# Command line recipes
 
-## Viewing MAST metadata
+For complete option details, see the {doc}`command reference <cli-reference>`.
+
+## Viewing MAST metadata columns
 
 List metadata for all available MAST observation columns:
 
@@ -37,22 +39,17 @@ continue, enter `n` to cancel, or pass `-y` / `--yes` to skip the prompt. Use
 `--target-subdir` to place each product under its target name, after the
 optional proposal directory.
 
-## Proprietary data
+(proprietary-data-without-an-environment-variable)=
+## Accessing proprietary data without an environment variable
 
-Both `query` and `download` authenticate automatically when `MAST_API_TOKEN`
-is set:
+As described in the {ref}`installation docs <accessing-proprietary-data>`,
+the simplest way to access proprietary data is by storing your MAST API token in an environment variable.
 
-```bash
-export MAST_API_TOKEN=your-mast-token
-mastodown download --programs 01200
-```
-
-Alternatively, pass `--auth` to securely enter a token through Astroquery's
-prompt:
+Alternatively, you can pass `--auth` to securely enter a token through Astroquery's prompt:
 
 ```bash
 mastodown query --programs 01200 --auth
 ```
 
-The environment token takes precedence over `--auth`. Do not pass tokens
-directly on the command line.
+The environment token takes precedence over `--auth`.
+Do not pass tokens directly on the command line.

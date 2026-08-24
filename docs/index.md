@@ -10,7 +10,9 @@ downloads.
 :caption: Contents
 
 installation
-cli
+getting-started
+cli-recipes
+cli-reference
 api/index
 ```
 

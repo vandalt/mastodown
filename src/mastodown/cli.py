@@ -15,6 +15,10 @@ QUERY_DESCRIPTION = "Query the MAST observations portal."
 DOWNLOAD_DESCRIPTION = (
     "Query the MAST observations portal and download the matching products."
 )
+GET_META_COMMAND = "get-meta"
+QUERY_COMMAND = "query"
+DOWNLOAD_COMMAND = "download"
+COMMAND_NAMES = (GET_META_COMMAND, QUERY_COMMAND, DOWNLOAD_COMMAND)
 
 
 def get_meta() -> None:
@@ -118,22 +122,22 @@ def authenticate(args: Namespace) -> None:
         Observations.login()
 
 
-def main() -> None:
-    """Run the mastodown command-line interface."""
+def create_parser() -> ArgumentParser:
+    """Create the mastodown command-line argument parser."""
     parser = ArgumentParser(
         prog="mastodown",
         description="Tiny Python MAST client.",
     )
     subparsers = parser.add_subparsers(dest="command")
     subparsers.add_parser(
-        "get-meta", help=GET_META_DESCRIPTION, description=GET_META_DESCRIPTION
+        GET_META_COMMAND, help=GET_META_DESCRIPTION, description=GET_META_DESCRIPTION
     )
     query_parser = subparsers.add_parser(
-        "query", help=QUERY_DESCRIPTION, description=QUERY_DESCRIPTION
+        QUERY_COMMAND, help=QUERY_DESCRIPTION, description=QUERY_DESCRIPTION
     )
     add_query_arguments(query_parser, ("-o", "--output"))
     download_parser = subparsers.add_parser(
-        "download", help=DOWNLOAD_DESCRIPTION, description=DOWNLOAD_DESCRIPTION
+        DOWNLOAD_COMMAND, help=DOWNLOAD_DESCRIPTION, description=DOWNLOAD_DESCRIPTION
     )
     add_query_arguments(download_parser, ("--query-output",))
     download_parser.add_argument(
@@ -167,18 +171,23 @@ def main() -> None:
         action="store_true",
         help="Download without prompting for confirmation.",
     )
+    return parser
 
+
+def main() -> None:
+    """Run the mastodown command-line interface."""
+    parser = create_parser()
     args = parser.parse_args()
     if args.command is None:
         parser.print_help()
         return
 
-    if args.command == "get-meta":
+    if args.command == GET_META_COMMAND:
         get_meta()
-    elif args.command == "query":
+    elif args.command == QUERY_COMMAND:
         authenticate(args)
         run_query(args)
-    elif args.command == "download":
+    elif args.command == DOWNLOAD_COMMAND:
         authenticate(args)
         products = run_query(args)
         if args.yes or confirm_download(dry_run=args.dry_run):
