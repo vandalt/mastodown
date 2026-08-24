@@ -25,3 +25,27 @@ Install the package and all development dependencies with
 ```bash
 uv sync
 ```
+
+You can also install them with pip directly:
+
+```bash
+python -m pip install -U -e . --group dev
+```
+
+If you install with pip instead of uv, simply remove `uv run` from all commands below.
+
+### Building the documentation
+
+The docs can be built with
+
+```bash
+uv run make -C docs html
+```
+
+### Running the unit tests
+
+Mastodown uses [pytest](https://pytest.org/) for testing.
+
+```bash
+uv run pytest
+```
