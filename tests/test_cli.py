@@ -4,9 +4,8 @@ from os import environ
 from unittest import TestCase
 from unittest.mock import Mock, call, patch
 
+from mastodown.cli import main
 from pandas import DataFrame
-
-from mastho.cli import main
 
 
 class QueryCommandTests(TestCase):
@@ -15,10 +14,10 @@ class QueryCommandTests(TestCase):
         calls = Mock()
 
         with (
-            patch("mastho.cli.Observations.login") as login,
-            patch("mastho.cli.query_obs", return_value=products) as query,
+            patch("mastodown.cli.Observations.login") as login,
+            patch("mastodown.cli.query_obs", return_value=products) as query,
             patch.dict(environ, {}, clear=True),
-            patch("sys.argv", ["mastho", "query", "--auth"]),
+            patch("sys.argv", ["mastodown", "query", "--auth"]),
             redirect_stdout(StringIO()),
         ):
             calls.attach_mock(login, "login")
@@ -44,10 +43,10 @@ class QueryCommandTests(TestCase):
         products = DataFrame({"productFilename": ["product.fits"]})
 
         with (
-            patch("mastho.cli.Observations.login") as login,
-            patch("mastho.cli.query_obs", return_value=products),
+            patch("mastodown.cli.Observations.login") as login,
+            patch("mastodown.cli.query_obs", return_value=products),
             patch.dict(environ, {}, clear=True),
-            patch("sys.argv", ["mastho", "query"]),
+            patch("sys.argv", ["mastodown", "query"]),
             redirect_stdout(StringIO()),
         ):
             main()
@@ -58,11 +57,11 @@ class QueryCommandTests(TestCase):
         products = DataFrame({"productFilename": ["product.fits"]})
 
         with (
-            patch("mastho.cli.query_obs", return_value=products) as query,
+            patch("mastodown.cli.query_obs", return_value=products) as query,
             patch(
                 "sys.argv",
                 [
-                    "mastho",
+                    "mastodown",
                     "query",
                     "--programs",
                     "01200",
@@ -109,8 +108,8 @@ class QueryCommandTests(TestCase):
         products = Mock()
 
         with (
-            patch("mastho.cli.query_obs", return_value=products),
-            patch("sys.argv", ["mastho", "query", "-o", "products.csv"]),
+            patch("mastodown.cli.query_obs", return_value=products),
+            patch("sys.argv", ["mastodown", "query", "-o", "products.csv"]),
             redirect_stdout(StringIO()),
         ):
             main()
@@ -121,8 +120,8 @@ class QueryCommandTests(TestCase):
         products = Mock()
 
         with (
-            patch("mastho.cli.query_obs", return_value=products),
-            patch("sys.argv", ["mastho", "query"]),
+            patch("mastodown.cli.query_obs", return_value=products),
+            patch("sys.argv", ["mastodown", "query"]),
             redirect_stdout(StringIO()),
         ):
             main()
@@ -136,11 +135,11 @@ class DownloadCommandTests(TestCase):
         calls = Mock()
 
         with (
-            patch("mastho.cli.Observations.login") as login,
-            patch("mastho.cli.query_obs", return_value=products) as query,
-            patch("mastho.cli.download_products") as download,
+            patch("mastodown.cli.Observations.login") as login,
+            patch("mastodown.cli.query_obs", return_value=products) as query,
+            patch("mastodown.cli.download_products") as download,
             patch.dict(environ, {"MAST_API_TOKEN": "token"}),
-            patch("sys.argv", ["mastho", "download", "--auth", "--yes"]),
+            patch("sys.argv", ["mastodown", "download", "--auth", "--yes"]),
             redirect_stdout(StringIO()),
         ):
             calls.attach_mock(login, "login")
@@ -167,13 +166,13 @@ class DownloadCommandTests(TestCase):
         products = Mock()
 
         with (
-            patch("mastho.cli.query_obs", return_value=products) as query,
-            patch("mastho.cli.download_products") as download,
+            patch("mastodown.cli.query_obs", return_value=products) as query,
+            patch("mastodown.cli.download_products") as download,
             patch("builtins.input") as prompt,
             patch(
                 "sys.argv",
                 [
-                    "mastho",
+                    "mastodown",
                     "download",
                     "--programs",
                     "01200",
@@ -228,10 +227,10 @@ class DownloadCommandTests(TestCase):
         products = Mock()
 
         with (
-            patch("mastho.cli.query_obs", return_value=products),
-            patch("mastho.cli.download_products") as download,
+            patch("mastodown.cli.query_obs", return_value=products),
+            patch("mastodown.cli.download_products") as download,
             patch("builtins.input", return_value=""),
-            patch("sys.argv", ["mastho", "download"]),
+            patch("sys.argv", ["mastodown", "download"]),
             redirect_stdout(StringIO()),
         ):
             main()
@@ -249,10 +248,10 @@ class DownloadCommandTests(TestCase):
         products = Mock()
 
         with (
-            patch("mastho.cli.query_obs", return_value=products),
-            patch("mastho.cli.download_products") as download,
+            patch("mastodown.cli.query_obs", return_value=products),
+            patch("mastodown.cli.download_products") as download,
             patch("builtins.input", return_value="n"),
-            patch("sys.argv", ["mastho", "download"]),
+            patch("sys.argv", ["mastodown", "download"]),
             redirect_stdout(StringIO()) as output,
         ):
             main()

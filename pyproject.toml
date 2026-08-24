@@ -1,5 +1,5 @@
 [project]
-name = "mastho"
+name = "mastodown"
 dynamic = ["version"]
 description = "Tiny Python MAST Client"
 readme = "README.md"
@@ -15,7 +15,7 @@ dev = [
 ]
 
 [project.scripts]
-mastho = "mastho.cli:main"
+mastodown = "mastodown.cli:main"
 
 [build-system]
 requires = ["hatchling", "hatch-vcs"]
@@ -25,4 +25,4 @@ build-backend = "hatchling.build"
 source = "vcs"
 
 [tool.hatch.build.hooks.vcs]
-version-file = "src/mastho/_version.py"
+version-file = "src/mastodown/_version.py"

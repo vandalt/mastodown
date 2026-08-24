@@ -1,11 +1,10 @@
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
-from astropy.time import Time
 from astropy.table import Table
+from astropy.time import Time
+from mastodown.query import query_obs
 from pandas import DataFrame
-
-from mastho.query import query_obs
 
 
 class QueryObservationTests(TestCase):
@@ -16,11 +15,11 @@ class QueryObservationTests(TestCase):
 
         with (
             patch(
-                "mastho.query.Observations.query_criteria",
+                "mastodown.query.Observations.query_criteria",
                 return_value=observations,
             ) as query,
-            patch("mastho.query.Observations.get_product_list"),
-            patch("mastho.query.Observations.filter_products", return_value=products),
+            patch("mastodown.query.Observations.get_product_list"),
+            patch("mastodown.query.Observations.filter_products", return_value=products),
         ):
             query_obs(
                 programs=["01200"],
@@ -55,11 +54,11 @@ class QueryObservationTests(TestCase):
 
         with (
             patch(
-                "mastho.query.Observations.query_criteria",
+                "mastodown.query.Observations.query_criteria",
                 return_value=observations,
             ),
-            patch("mastho.query.Observations.get_product_list"),
-            patch("mastho.query.Observations.filter_products", return_value=products),
+            patch("mastodown.query.Observations.get_product_list"),
+            patch("mastodown.query.Observations.filter_products", return_value=products),
         ):
             result = query_obs(programs=["01200"], keep_ta=True)
 

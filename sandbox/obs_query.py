@@ -7,8 +7,8 @@
 # %%
 from pathlib import Path
 
-from mastho.download import download_products
-from mastho.query import query_obs
+from mastodown.download import download_products
+from mastodown.query import query_obs
 
 programs = ["01200", "02473"]
 calib_level = [1]

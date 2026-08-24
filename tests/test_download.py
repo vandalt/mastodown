@@ -3,10 +3,9 @@ from tempfile import TemporaryDirectory
 from unittest import TestCase
 from unittest.mock import patch
 
+import mastodown.download as download
+from mastodown.download import check_manifest, download_products, target_directory_name
 from pandas import DataFrame
-
-import mastho.download as download
-from mastho.download import check_manifest, download_products, target_directory_name
 
 
 def products_for(directory: Path) -> DataFrame:
@@ -44,7 +43,7 @@ class DownloadProductsTests(TestCase):
         with TemporaryDirectory() as directory:
             product = products_for(Path(directory)).drop(columns=["local_path"])
             with patch(
-                "mastho.download.update_manifest",
+                "mastodown.download.update_manifest",
                 wraps=download.update_manifest,
             ) as update_manifest:
                 download_products(
@@ -64,7 +63,7 @@ class DownloadProductsTests(TestCase):
         with TemporaryDirectory() as directory:
             product = products_for(Path(directory)).drop(columns=["local_path"])
             with patch(
-                "mastho.download.Observations.download_file",
+                "mastodown.download.Observations.download_file",
                 return_value=("ERROR", "download failed", None),
             ):
                 download_products(product, download_dir=directory, proposal_subdir=False)
@@ -77,7 +76,7 @@ class DownloadProductsTests(TestCase):
         with TemporaryDirectory() as directory:
             product = products_for(Path(directory)).drop(columns=["local_path"])
             with patch(
-                "mastho.download.update_manifest",
+                "mastodown.download.update_manifest",
                 wraps=download.update_manifest,
             ) as update_manifest:
                 download_products(

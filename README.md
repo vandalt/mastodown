@@ -1,20 +1,20 @@
-# MASTho: Tiny Python MAST client
+# Mastodown: Tiny Python MAST client
 
-This is a tiny Python client to query MAST on the command line.
+This is a tiny Python client to query MAST on the command line or from Python.
 I also had a lot of MAST-related codes scattered across projects and figured this would be a good place to centralize them.
 
 ## Command line
 
 List metadata for all available MAST observation columns:
 
-```console
-mastho get-meta
+```bash
+mastodown get-meta
 ```
 
 Query JWST products and save the resulting table to CSV:
 
-```console
-mastho query --programs 01200 02473 --calib-level 1 --product-type SCIENCE --extension fits -o products.csv
+```bash
+mastodown query --programs 01200 02473 --calib-level 1 --product-type SCIENCE --extension fits -o products.csv
 ```
 
 Filter options accept one or more space-separated values. Use `--keep-ta` to retain
@@ -25,8 +25,8 @@ observations.
 
 Query products and download them after confirmation:
 
-```console
-mastho download --programs 01200 02473 --download-dir data --dry-run
+```bash
+mastodown download --programs 01200 02473 --download-dir data --dry-run
 ```
 
 The download command prompts after showing the query result; press Enter to continue,
@@ -40,16 +40,21 @@ proposal directory.
 
 Both `query` and `download` authenticate automatically when `MAST_API_TOKEN` is set:
 
-```console
+```bash
 export MAST_API_TOKEN=your-mast-token
-mastho download --programs 01200
+mastodown download --programs 01200
 ```
 
 Alternatively, pass `--auth` to securely enter a token through Astroquery's prompt:
 
-```console
-mastho query --programs 01200 --auth
+```bash
+mastodown query --programs 01200 --auth
 ```
 
 The environment token takes precedence over `--auth`. Do not pass tokens directly on
 the command line.
+
+## References
+
+- [Astroquery's MAST module](https://astroquery.readthedocs.io/en/latest/mast/mast.html)
+- [`jwst_mast_query`](https://github.com/spacetelescope/jwst_mast_query)

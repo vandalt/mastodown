@@ -4,8 +4,8 @@ from os import environ
 from astroquery.mast import Observations
 from pandas import DataFrame
 
-from mastho.download import download_products
-from mastho.query import query_obs
+from mastodown.download import download_products
+from mastodown.query import query_obs
 
 
 def get_meta() -> None:
@@ -110,9 +110,9 @@ def authenticate(args: Namespace) -> None:
 
 
 def main() -> None:
-    """Run the mastho command-line interface."""
+    """Run the mastodown command-line interface."""
     parser = ArgumentParser(
-        prog="mastho",
+        prog="mastodown",
         description="Tiny Python MAST client.",
     )
     subparsers = parser.add_subparsers(dest="command")
