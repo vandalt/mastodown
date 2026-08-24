@@ -12,6 +12,10 @@ dependencies = ["astroquery", "pandas"]
 [dependency-groups]
 dev = [
     "ipython",
+    {include-group = "test"},
+]
+test = [
+    "pytest",
 ]
 
 [project.scripts]
