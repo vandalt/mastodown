@@ -107,7 +107,7 @@ def query_obs(
         ).reset_index(drop=True)
 
     # Print final data before download
-    total_size = sum(products_df["size"]) / 1e9
+    total_size = products_df["size"].sum() / 1e9 if "size" in products_df else 0
     num_files = len(products_df)
     print(
         f"Final list contains {num_files} files with total size {total_size:.2f} Gb"

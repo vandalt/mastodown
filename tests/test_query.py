@@ -3,8 +3,9 @@ from unittest.mock import Mock, patch
 
 from astropy.table import Table
 from astropy.time import Time
-from mastodown.query import query_obs
 from pandas import DataFrame
+
+from mastodown.query import query_obs
 
 
 class QueryObservationTests(TestCase):

@@ -4,8 +4,9 @@ from os import environ
 from unittest import TestCase
 from unittest.mock import Mock, call, patch
 
-from mastodown.cli import main
 from pandas import DataFrame
+
+from mastodown.cli import main
 
 
 class QueryCommandTests(TestCase):

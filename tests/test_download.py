@@ -3,9 +3,10 @@ from tempfile import TemporaryDirectory
 from unittest import TestCase
 from unittest.mock import patch
 
+from pandas import DataFrame
+
 import mastodown.download as download
 from mastodown.download import check_manifest, download_products, target_directory_name
-from pandas import DataFrame
 
 
 def products_for(directory: Path) -> DataFrame:

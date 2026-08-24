@@ -1,8 +1,7 @@
-from pathlib import Path
 import subprocess
 import sys
+from pathlib import Path
 from unittest import TestCase
-
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 
