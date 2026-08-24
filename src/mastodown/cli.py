@@ -7,6 +7,15 @@ from pandas import DataFrame
 from mastodown.download import download_products
 from mastodown.query import query_obs
 
+GET_META_DESCRIPTION = (
+    "List metadata for all MAST observation columns. "
+    "Should match the web portal interface."
+)
+QUERY_DESCRIPTION = "Query the MAST observations portal."
+DOWNLOAD_DESCRIPTION = (
+    "Query the MAST observations portal and download the matching products."
+)
+
 
 def get_meta() -> None:
     """Print metadata for all MAST observation columns."""
@@ -117,17 +126,14 @@ def main() -> None:
     )
     subparsers = parser.add_subparsers(dest="command")
     subparsers.add_parser(
-        "get-meta",
-        help="List metadata for all MAST observation columns. Should match the web portal interface.",
+        "get-meta", help=GET_META_DESCRIPTION, description=GET_META_DESCRIPTION
     )
     query_parser = subparsers.add_parser(
-        "query",
-        help="Query the MAST observations portal.",
+        "query", help=QUERY_DESCRIPTION, description=QUERY_DESCRIPTION
     )
     add_query_arguments(query_parser, ("-o", "--output"))
     download_parser = subparsers.add_parser(
-        "download",
-        help="Query the MAST observations portal and download the matching products.",
+        "download", help=DOWNLOAD_DESCRIPTION, description=DOWNLOAD_DESCRIPTION
     )
     add_query_arguments(download_parser, ("--query-output",))
     download_parser.add_argument(
