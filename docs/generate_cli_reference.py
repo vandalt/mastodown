@@ -35,7 +35,7 @@ def render_reference() -> str:
     sections = [
         "# Command reference",
         "",
-        "This reference is generated from the CLI's `--help` output. Do not edit it manually.",
+        "<!-- This reference is generated from the CLI's `--help` output. Do not edit it manually. -->",
     ]
     for command in (None, *COMMAND_NAMES):
         invocation = "mastodown" if command is None else f"mastodown {command}"
@@ -57,9 +57,10 @@ def write_reference(*, check: bool = False) -> None:
     """Write the reference, or fail when the committed version is stale."""
     content = render_reference()
     if check:
-        if not REFERENCE_PATH.is_file() or REFERENCE_PATH.read_text(
-            encoding="utf-8"
-        ) != content:
+        if (
+            not REFERENCE_PATH.is_file()
+            or REFERENCE_PATH.read_text(encoding="utf-8") != content
+        ):
             msg = f"{REFERENCE_PATH.relative_to(PROJECT_DIR)} is out of date."
             raise SystemExit(msg)
         return
