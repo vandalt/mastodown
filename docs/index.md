@@ -5,9 +5,10 @@ Mastodown is a small Python client for querying and downloading data from the
 product filtering, authenticated access to proprietary data, and organized
 downloads.
 
+## Table of contents
+
 ```{toctree}
 :maxdepth: 1
-:caption: Contents
 
 installation
 getting-started
