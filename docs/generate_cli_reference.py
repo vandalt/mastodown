@@ -44,7 +44,7 @@ def render_reference() -> str:
                 "",
                 f"## `{invocation}`",
                 "",
-                "```bash",
+                "```console",
                 f"$ {invocation} --help",
                 format_command_help(parser, command),
                 "```",

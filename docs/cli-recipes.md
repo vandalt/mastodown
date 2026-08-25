@@ -6,7 +6,7 @@ For complete option details, see the {doc}`command reference <cli-reference>`.
 
 List metadata for all available MAST observation columns:
 
-```bash
+```console
 mastodown get-meta
 ```
 
@@ -14,7 +14,7 @@ mastodown get-meta
 
 Query JWST products and save the resulting table to CSV:
 
-```bash
+```console
 mastodown query --programs 01200 02473 --calib-level 1 --product-type SCIENCE --extension fits -o products.csv
 ```
 
@@ -28,7 +28,7 @@ dates, and `--max-entries` to limit returned observations.
 
 Query products and download them after confirmation:
 
-```bash
+```console
 mastodown download --programs 01200 02473 --download-dir data --dry-run
 ```
 
@@ -47,7 +47,7 @@ the simplest way to access proprietary data is by storing your MAST API token in
 
 Alternatively, you can pass `--auth` to securely enter a token through Astroquery's prompt:
 
-```bash
+```console
 mastodown query --programs 01200 --auth
 ```
 

@@ -18,7 +18,7 @@ We will illustrate this through an example where we download data from two cycle
 
 First, we will query MAST to get a preview of all data products in the two programs:
 
-```bash
+```console
 $ mastodown query --programs 01200 02473
 
 Final list contains 8774 files with total size 649.74 Gb
@@ -49,7 +49,7 @@ We will add the following constraints:
 2. Only download FITS files
 3. Only download science files and ignore auxiliary products
 
-```bash
+```console
 $ mastodown query --programs 01200 02473 --calib-level 1 --product-type SCIENCE --extension fits
 
 Final list contains 533 files with total size 150.68 Gb
@@ -75,7 +75,7 @@ With a few filters, we narrowed down the search to "only" 150 Gb.
 NIRCam data from the blue channel is particularly voluminous because it includes four detectors.
 We can include only the mid-IR filters to reduce the data volume significantly:
 
-```bash
+```console
 $ mastodown query --programs 01200 02473 --calib-level 1 --product-type SCIENCE --extension fits --filters F480M F430M F380M
 
 Final list contains 113 files with total size 32.38 Gb
@@ -110,7 +110,7 @@ To skip the prompt, simply add the `--yes` or `-y` flag to the command.
 
 To actually download the data, remove the `--dry-run` flag.
 
-```bash
+```console
 $ mastodown download --programs 01200 02473 --calib-level 1 --product-type SCIENCE --extension fits --filters F480M F430M F380M --download-dir data --dry-run
 
 Final list contains 113 files with total size 32.38 Gb
