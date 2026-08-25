@@ -1,7 +1,5 @@
 # Command reference
 
-This reference is generated from the CLI's `--help` output. Do not edit it manually.
-
 ## `mastodown`
 
 ```console

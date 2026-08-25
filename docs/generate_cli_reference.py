@@ -1,9 +1,9 @@
 """Generate the command-line reference from Mastodown's argument parser."""
 
-from argparse import ArgumentParser
-from pathlib import Path
 import re
 import sys
+from argparse import ArgumentParser
+from pathlib import Path
 
 DOCS_DIR = Path(__file__).resolve().parent
 PROJECT_DIR = DOCS_DIR.parent
@@ -44,7 +44,7 @@ def render_reference() -> str:
                 "",
                 f"## `{invocation}`",
                 "",
-                "```console",
+                "```bash",
                 f"$ {invocation} --help",
                 format_command_help(parser, command),
                 "```",
