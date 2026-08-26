@@ -30,7 +30,9 @@ def update_manifest(manifest: DataFrame, new_products: DataFrame) -> DataFrame:
     return manifest
 
 
-def check_manifest(products: DataFrame, manifest: DataFrame, overwrite: bool = False) -> tuple[DataFrame, DataFrame]:
+def check_manifest(
+    products: DataFrame, manifest: DataFrame, overwrite: bool = False
+) -> tuple[DataFrame, DataFrame]:
     """Check the products to download against the manifest
 
     Some things to note:
@@ -148,8 +150,11 @@ def download_products(
 
 # TODO: Check the link to download_products
 def download_product(
-    product: Series, overwrite: bool = False, dry_run: bool = False
-) -> bool:
+    product: Series,
+    overwrite: bool = False,
+    dry_run: bool = False,
+    download_dir: Path | str | None = None,
+) -> Path | bool:
     """Download a single data product from MAST
 
     Called by :func:`download_products`.
@@ -157,20 +162,29 @@ def download_product(
     :param product: The info on the data product to download as a pandas series
     :param overwrite: Whether existing files should be overwritten. Defaults to False
     :param dry_run: Whether this is a dry-run where no I/O happens. Defaults to False
-    :return: True if the download was successful, False otherwise
+    :param download_dir: Directory where the file will be downloaded. If ``local_path``
+                         is a key in the product, ``download_dir`` is ignored.
+                         Defaults to `None` which will download the file in the current directory.
+    :return: The path if the download was successful, False otherwise
     """
-    local_path = Path(product.local_path)
+    if "local_path" in product:
+        local_path = Path(product.local_path)
+    else:
+        if download_dir is None:
+            download_dir = "."
+        download_dir = Path(download_dir)
+        local_path = download_dir / product["productFilename"]
     # TODO: Uniform/flexible keys for mission
     if local_path.exists() and not overwrite:
         print(f"File {local_path} already exists, skipping download")
-        return True
+        return local_path
     elif local_path.exists() and overwrite:
         print(f"Overwriting existing file: {local_path}")
     else:
         print(f"Downloading file: {local_path}")
 
     if dry_run:
-        return True
+        return local_path
 
     local_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -182,4 +196,4 @@ def download_product(
         print(f"Download failed for product {local_path} with status {status}: {msg}")
         return False
 
-    return True
+    return local_path
