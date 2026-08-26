@@ -5,7 +5,7 @@ from astroquery.mast import Observations
 from pandas import DataFrame
 
 from mastodown.download import download_products
-from mastodown.query import query_obs
+from mastodown.query import get_meta, query_obs
 
 GET_META_DESCRIPTION = (
     "List metadata for all MAST observation columns. "
@@ -19,11 +19,6 @@ GET_META_COMMAND = "get-meta"
 QUERY_COMMAND = "query"
 DOWNLOAD_COMMAND = "download"
 COMMAND_NAMES = (GET_META_COMMAND, QUERY_COMMAND, DOWNLOAD_COMMAND)
-
-
-def get_meta() -> None:
-    """Print metadata for all MAST observation columns."""
-    Observations.get_metadata("observations").pprint(max_lines=-1)
 
 
 def add_query_arguments(parser: ArgumentParser, output_flags: tuple[str, ...]) -> None:

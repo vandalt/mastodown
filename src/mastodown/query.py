@@ -6,6 +6,11 @@ from astroquery.mast import MastMissions, Observations
 from pandas import DataFrame
 
 
+def get_meta() -> None:
+    """Print metadata for all MAST observation columns."""
+    Observations.get_metadata("observations").pprint(max_lines=-1)
+
+
 def parse_date(date_string: str) -> datetime:
     """Parse a YYYY-MM-DD date string."""
     try:
