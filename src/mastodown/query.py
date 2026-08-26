@@ -26,8 +26,11 @@ def query_obs(
     programs: list[str] | str | None = None,
     calib_level: list[int] | int | None = None,
     product_type: list[str] | str | None = None,
+    product_subgroup: list[str] | str | None = None,
     extension: list[str] | str | None = None,
     filters: list[str] | str | None = None,
+    target_name: list[str] | str | None = None,
+    instrument_name: list[str] | str | None = None,
     start_date: str | None = None,
     end_date: str | None = None,
     max_entries: int | None = None,
@@ -40,7 +43,20 @@ def query_obs(
     if max_entries is not None and max_entries <= 0:
         raise ValueError("max_entries must be greater than zero.")
 
-    criteria = {"proposal_id": programs, "filters": filters}
+    # TODO: There has to be a cleaner way to pre-process arguments
+    if isinstance(programs, (str, int)):
+        programs = [programs]
+    if isinstance(product_type, str):
+        product_type = [product_type]
+    if isinstance(product_subgroup, str):
+        product_subgroup = [product_subgroup]
+
+    criteria = {
+        "proposal_id": programs,
+        "filters": filters,
+        "target_name": target_name,
+        "instrument_name": instrument_name,
+    }
     if start_date is not None and end_date is not None:
         start = parse_date(start_date)
         end = parse_date(end_date)
@@ -56,9 +72,7 @@ def query_obs(
         criteria.update(pagesize=max_entries, page=1)
     obs_tbl = Observations.query_criteria(**criteria, project="JWST")
     target_names = (
-        obs_tbl["obsid", "target_name"]
-        .to_pandas()
-        .drop_duplicates(subset=["obsid"])
+        obs_tbl["obsid", "target_name"].to_pandas().drop_duplicates(subset=["obsid"])
     )
 
     if verbose:
@@ -75,9 +89,14 @@ def query_obs(
     # Then we get all data products associated with the observations
     products_tbl = Observations.get_product_list(obs_tbl)
 
+    if verbose:
+        print("Found the following products before filtering:")
+        print(products_tbl)
+
     # Then filter to keep science and/or auxiliary, pick the calib level and extension
     product_filters = {
-        "productType": product_type,
+        "productType": [x.upper() for x in product_type],
+        "productSubGroupDescription": [x.upper() for x in product_subgroup],
         "calib_level": calib_level,
         "extension": extension,
     }
@@ -86,15 +105,17 @@ def query_obs(
         products_tbl,
         **product_filters,
     ).to_pandas()
-    products_df = products_df.drop(columns=["target_name"], errors="ignore").merge(
-        target_names,
-        left_on="parent_obsid",
-        right_on="obsid",
-        how="left",
-    ).drop(columns=["obsid"])
-    products_df = products_df[
-        ["target_name", *products_df.columns.drop("target_name")]
-    ]
+    products_df = (
+        products_df.drop(columns=["target_name"], errors="ignore")
+        .merge(
+            target_names,
+            left_on="parent_obsid",
+            right_on="obsid",
+            how="left",
+        )
+        .drop(columns=["obsid"])
+    )
+    products_df = products_df[["target_name", *products_df.columns.drop("target_name")]]
 
     if not keep_ta:
         # We use the mission interface to drop TA observations
@@ -114,8 +135,6 @@ def query_obs(
     # Print final data before download
     total_size = products_df["size"].sum() / 1e9 if "size" in products_df else 0
     num_files = len(products_df)
-    print(
-        f"Final list contains {num_files} files with total size {total_size:.2f} Gb"
-    )
+    print(f"Final list contains {num_files} files with total size {total_size:.2f} Gb")
 
     return products_df
