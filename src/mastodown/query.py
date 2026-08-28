@@ -95,8 +95,8 @@ def query_obs(
 
     # Then filter to keep science and/or auxiliary, pick the calib level and extension
     product_filters = {
-        "productType": [x.upper() for x in product_type],
-        "productSubGroupDescription": [x.upper() for x in product_subgroup],
+        "productType": [x.upper() for x in product_type] if product_type else None,
+        "productSubGroupDescription": [x.upper() for x in product_subgroup] if product_subgroup else None,
         "calib_level": calib_level,
         "extension": extension,
     }
