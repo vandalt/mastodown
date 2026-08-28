@@ -71,9 +71,6 @@ def query_obs(
     if max_entries is not None:
         criteria.update(pagesize=max_entries, page=1)
     obs_tbl = Observations.query_criteria(**criteria, project="JWST")
-    target_names = (
-        obs_tbl["obsid", "target_name"].to_pandas().drop_duplicates(subset=["obsid"])
-    )
 
     if verbose:
         display_columns = [
@@ -105,32 +102,41 @@ def query_obs(
         products_tbl,
         **product_filters,
     ).to_pandas()
-    products_df = (
-        products_df.drop(columns=["target_name"], errors="ignore")
-        .merge(
-            target_names,
-            left_on="parent_obsid",
-            right_on="obsid",
-            how="left",
-        )
-        .drop(columns=["obsid"])
-    )
-    products_df = products_df[["target_name", *products_df.columns.drop("target_name")]]
 
-    if not keep_ta:
-        # We use the mission interface to drop TA observations
-        missions = MastMissions(mission="jwst")
-        metadata = missions.query_criteria(
-            program=", ".join(str(p) for p in programs),
-            select_cols=["exp_type", "fileSetName"],
-        )
-        metadata = metadata.to_pandas()
-        metadata_img = metadata.query("exp_type not in ['NIS_TACQ', 'NIS_TACONFIRM']")
+    if len(products_df) > 0:
+        metadata_programs = programs or products_df["proposal_id"].dropna().unique()
+        metadata = MastMissions(mission="jwst").query_criteria(
+            program=", ".join(str(p) for p in metadata_programs),
+            select_cols=["exp_type", "fileSetName", "targprop"],
+        ).to_pandas()
 
-        non_ta_files = tuple(metadata_img.fileSetName)  # noqa: F841
-        products_df = products_df.query(
-            "obs_id.str.startswith(@non_ta_files)"
-        ).reset_index(drop=True)
+        if not keep_ta:
+            non_ta_files = tuple(  # noqa: F841
+                metadata.query(
+                    "exp_type not in ['NIS_TACQ', 'NIS_TACONFIRM']"
+                ).fileSetName
+            )
+            products_df = products_df.query(
+                "obs_id.str.startswith(@non_ta_files)"
+            ).reset_index(drop=True)
+
+        target_names = []
+        for obs_id in products_df["obs_id"]:
+            matches = metadata.loc[
+                metadata["fileSetName"].map(obs_id.startswith), "targprop"
+            ]
+            if len(matches) != 1:
+                raise ValueError(
+                    f"Expected exactly one JWST metadata match for product {obs_id!r}; "
+                    f"found {len(matches)}."
+                )
+            target_names.append(matches.item())
+        products_df = products_df.drop(columns=["target_name"], errors="ignore")
+        products_df.insert(0, "target_name", target_names)
+    else:
+        products_df.insert(0, "target_name", [])
+
+    products_df = products_df.sort_values("obs_id").reset_index(drop=True)
 
     # Print final data before download
     total_size = products_df["size"].sum() / 1e9 if "size" in products_df else 0
