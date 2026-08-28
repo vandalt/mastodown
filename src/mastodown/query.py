@@ -87,7 +87,7 @@ def query_obs(
         obs_tbl[display_columns].pprint(max_lines=-1)
 
     # Then we get all data products associated with the observations
-    products_tbl = Observations.get_product_list(obs_tbl)
+    products_tbl = Observations.get_unique_product_list(obs_tbl)
 
     if verbose:
         print("Found the following products before filtering:")

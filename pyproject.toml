@@ -25,6 +25,11 @@ test = [
     "pytest",
 ]
 
+[tool.pytest.ini_options]
+markers = [
+    "integration: tests that call the live MAST API",
+]
+
 [project.scripts]
 mastodown = "mastodown.cli:main"
 

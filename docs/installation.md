@@ -63,3 +63,9 @@ Mastodown uses [pytest](https://pytest.org/) for testing.
 ```console
 uv run pytest
 ```
+
+Tests that query the live public MAST API are excluded by default. Run them with:
+
+```console
+uv run pytest --run-integration
+```
