@@ -86,7 +86,7 @@ def download_products(
     target_subdir: bool = False,
     overwrite: bool = False,
     dry_run: bool = False,
-):
+) -> DataFrame:
     """Download data products from mast
 
     :param products: Dataframe of data products to download
@@ -97,6 +97,7 @@ def download_products(
                           in the proposal or download directory. Defaults to False
     :param overwrite: Whether existing files should be overwritten. Defaults to False
     :param dry_run: Whether this is a dry-run where no I/O happens. Defaults to False
+    :return: The products data frame with any modifications (mainly the `local_path` key) applied
     """
     products = products.copy()
 
@@ -146,6 +147,7 @@ def download_products(
     if not dry_run:
         manifest.to_csv(manifest_path, index=False)
         print(f"Saved manifest with {len(manifest)} data products to {manifest_path}")
+    return products
 
 
 # TODO: Check the link to download_products
