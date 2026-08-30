@@ -6,7 +6,21 @@ from unittest.mock import Mock, call, patch
 
 from pandas import DataFrame
 
+from mastodown._version import __version__
 from mastodown.cli import main
+
+
+class RootCommandTests(TestCase):
+    def test_version_prints_current_package_version(self):
+        with (
+            patch("sys.argv", ["mastodown", "--version"]),
+            redirect_stdout(StringIO()) as output,
+            self.assertRaises(SystemExit) as error,
+        ):
+            main()
+
+        self.assertEqual(error.exception.code, 0)
+        self.assertEqual(output.getvalue(), f"mastodown {__version__}\n")
 
 
 class QueryCommandTests(TestCase):

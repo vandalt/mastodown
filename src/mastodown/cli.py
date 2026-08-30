@@ -6,6 +6,7 @@ from pandas import DataFrame
 
 from mastodown.download import download_products
 from mastodown.query import get_meta, query_obs
+from mastodown._version import __version__
 
 GET_META_DESCRIPTION = (
     "List metadata for all MAST observation columns. "
@@ -122,6 +123,11 @@ def create_parser() -> ArgumentParser:
     parser = ArgumentParser(
         prog="mastodown",
         description="Tiny Python MAST client.",
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s {__version__}",
     )
     subparsers = parser.add_subparsers(dest="command")
     subparsers.add_parser(
