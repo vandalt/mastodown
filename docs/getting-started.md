@@ -1,7 +1,5 @@
 # Getting started
 
-<!-- TODO: Add outputs -->
-
 Mastodown is primarily intended as a command line tool.
 For complex Python scripts, use the [MAST module from Astroquery](https://astroquery.readthedocs.io/en/latest/mast/mast.html) directly.
 
@@ -21,21 +19,21 @@ First, we will query MAST to get a preview of all data products in the two progr
 ```console
 $ mastodown query --programs 01200 02473
 
-Final list contains 8774 files with total size 649.74 Gb
-       target_name      obsID obs_collection dataproduct_type                           obs_id                                        description type  ... proposal_id                                    productFilename      size parent_obsid dataRights calib_level    filters
-0     WISE-1738+27   87621090           JWST            image  jw02473074001_02101_00005_nrcb1  exposure (L2a): charge trap product for persis...    S  ...        2473   jw02473074001_02101_00005_nrcb1_trapsfilled.fits  50365440     87622652     PUBLIC           2      F150W
-1     WISE-1738+27   87621090           JWST            image  jw02473074001_02101_00005_nrcb1         source/target (L3) : association generator    S  ...        2473  jw02473-o074_20260725t120007_image2_00005_asn....      1803     87622652     PUBLIC           2      F150W
-2     WISE-1738+27   87621090           JWST            image  jw02473074001_02101_00005_nrcb1              source/target (L3) : association pool    S  ...        2473                   jw02473_20260725t120007_pool.csv    222244     87622652     PUBLIC           2      F150W
-3     WISE-1738+27   87621090           JWST            image  jw02473074001_02101_00005_nrcb1                                       Preview-Full    S  ...        2473          jw02473074001_02101_00005_nrcb1_uncal.jpg    794363     87622652     PUBLIC           1      F150W
-4     WISE-1738+27   87621090           JWST            image  jw02473074001_02101_00005_nrcb1                                       Preview-Full    S  ...        2473            jw02473074001_02101_00005_nrcb1_cal.jpg   1062300     87622652     PUBLIC           2      F150W
-...            ...        ...            ...              ...                              ...                                                ...  ...  ...         ...                                                ...       ...          ...        ...         ...        ...
-8769      HD-93649  233595389           JWST            image    jw01200003001_03103_00001_nis                                       Preview-Full    S  ...        1200      jw01200003001_03103_00001_nis_trapsfilled.jpg     50557    233595389     PUBLIC           2  F430M;NRM
-8770      HD-93649  233595389           JWST            image    jw01200003001_03103_00001_nis             exposure (L2b): 3D calibrated exposure    S  ...        1200         jw01200003001_03103_00001_nis_calints.fits  28543680    233595389     PUBLIC           2  F430M;NRM
-8771      HD-93649  233595389           JWST            image    jw01200003001_03103_00001_nis  exposure (L2a): 2D count rate averaged over in...    S  ...        1200            jw01200003001_03103_00001_nis_rate.fits    201600    233595389     PUBLIC           2  F430M;NRM
-8772      HD-93649  233595389           JWST            image    jw01200003001_03103_00001_nis       exposure (L2a): 3D countrate per integration    S  ...        1200        jw01200003001_03103_00001_nis_rateints.fits  23774400    233595389     PUBLIC           2  F430M;NRM
-8773      HD-93649  233595389           JWST            image    jw01200003001_03103_00001_nis      exposure (L1b): Uncalibrated 4D exposure data    S  ...        1200           jw01200003001_03103_00001_nis_uncal.fits  21372480    233595389     PUBLIC           1  F430M;NRM
+Final list contains 8172 files with total size 646.28 Gb
+       target_name      obsID obs_collection dataproduct_type                                        obs_id  ...      size parent_obsid dataRights calib_level    filters
+0        HD-218396  232954397           JWST     measurements     jw01200-c1001_t001_niriss_f380m-nrm-sub80  ...  41808960    232954397     PUBLIC           3  F380M;NRM
+1        HD-218396  232954397           JWST     measurements     jw01200-c1001_t001_niriss_f380m-nrm-sub80  ...      4371    232954397     PUBLIC           3  F380M;NRM
+2         HD-95086  232307010           JWST            image  jw01200-c1001_t002_niriss_clearp-f380m-sub80  ...       996    232307010     PUBLIC           3      F380M
+3         HD-95086  232307010           JWST            image  jw01200-c1001_t002_niriss_clearp-f380m-sub80  ...     17530    232307010     PUBLIC           3      F380M
+4         HD-95086  232307010           JWST            image  jw01200-c1001_t002_niriss_clearp-f380m-sub80  ...    103680    232307010     PUBLIC           3      F380M
+...            ...        ...            ...              ...                                           ...  ...       ...          ...        ...         ...        ...
+8167  WISE-1738+27   87621135           JWST            image            jw02473074001_02101_00005_nrcblong  ...   1130005     87622666     PUBLIC           2      F480M
+8168  WISE-1738+27   87621135           JWST            image            jw02473074001_02101_00005_nrcblong  ...   1163380     87622666     PUBLIC           2      F480M
+8169  WISE-1738+27   87621135           JWST            image            jw02473074001_02101_00005_nrcblong  ...    875335     87622666     PUBLIC           2      F480M
+8170  WISE-1738+27   87621135           JWST            image            jw02473074001_02101_00005_nrcblong  ...    978355     87622666     PUBLIC           1      F480M
+8171  WISE-1738+27   87621135           JWST            image            jw02473074001_02101_00005_nrcblong  ...   1231484     87622666     PUBLIC           2      F480M
 
-[8774 rows x 21 columns]
+[8172 rows x 21 columns]
 ```
 
 This yields _a lot_ of data (almost 700 Gb).
@@ -52,21 +50,23 @@ We will add the following constraints:
 ```console
 $ mastodown query --programs 01200 02473 --calib-level 1 --product-type SCIENCE --extension fits
 
-Final list contains 533 files with total size 150.68 Gb
-      target_name      obsID obs_collection dataproduct_type                              obs_id                                    description type  ... proposal_id                                productFilename       size parent_obsid dataRights calib_level    filters
-0    WISE-1738+27   87621090           JWST            image     jw02473074001_02101_00005_nrcb1  exposure (L1b): Uncalibrated 4D exposure data    S  ...        2473     jw02473074001_02101_00005_nrcb1_uncal.fits  293659200     87622652     PUBLIC           1      F150W
-1    WISE-1738+27   87621093           JWST            image     jw02473074001_02101_00003_nrcb2  exposure (L1b): Uncalibrated 4D exposure data    S  ...        2473     jw02473074001_02101_00003_nrcb2_uncal.fits  293659200     87622652     PUBLIC           1      F150W
-2    WISE-1738+27   87621095           JWST            image     jw02473074001_02101_00004_nrcb1  exposure (L1b): Uncalibrated 4D exposure data    S  ...        2473     jw02473074001_02101_00004_nrcb1_uncal.fits  293659200     87622652     PUBLIC           1      F150W
-3    WISE-1738+27   87621099           JWST            image     jw02473074001_02101_00005_nrcb3  exposure (L1b): Uncalibrated 4D exposure data    S  ...        2473     jw02473074001_02101_00005_nrcb3_uncal.fits  293659200     87622652     PUBLIC           1      F150W
-4    WISE-1738+27   87621103           JWST            image  jw02473074001_02101_00001_nrcblong  exposure (L1b): Uncalibrated 4D exposure data    S  ...        2473  jw02473074001_02101_00001_nrcblong_uncal.fits  293659200     87622666     PUBLIC           1      F480M
-..            ...        ...            ...              ...                                 ...                                            ...  ...  ...         ...                                            ...        ...          ...        ...         ...        ...
-528      HD-95086  233545572           JWST            image       jw01200003001_03104_00001_nis  exposure (L1b): Uncalibrated 4D exposure data    S  ...        1200       jw01200003001_03104_00001_nis_uncal.fits  472345920    232954396     PUBLIC           1  F380M;NRM
-529     HD-218396  233545572           JWST            image       jw01200003001_03104_00001_nis  exposure (L1b): Uncalibrated 4D exposure data    S  ...        1200       jw01200003001_03104_00001_nis_uncal.fits  472345920    232954397     PUBLIC           1  F380M;NRM
-530     HD-218396  233595304           JWST            image       jw01200001001_03102_00001_nis  exposure (L1b): Uncalibrated 4D exposure data    S  ...        1200       jw01200001001_03102_00001_nis_uncal.fits  263986560    232954397     PUBLIC           1  F380M;NRM
-531      HD-93649  233595388           JWST            image       jw01200003001_03102_00001_nis  exposure (L1b): Uncalibrated 4D exposure data    S  ...        1200       jw01200003001_03102_00001_nis_uncal.fits   26017920    233595388     PUBLIC           1  F480M;NRM
-532      HD-93649  233595389           JWST            image       jw01200003001_03103_00001_nis  exposure (L1b): Uncalibrated 4D exposure data    S  ...        1200       jw01200003001_03103_00001_nis_uncal.fits   21372480    233595389     PUBLIC           1  F430M;NRM
+INFO: 757 of 9062 products were duplicates. Only returning 8305 unique product(s). [astroquery.mast.utils]
+INFO: To return all products, use `Observations.get_product_list` [astroquery.mast.observations]
+Final list contains 531 files with total size 150.19 Gb
+      target_name      obsID obs_collection dataproduct_type                              obs_id  ...        size parent_obsid dataRights calib_level    filters
+0       HD-218396  233595304           JWST            image       jw01200001001_03102_00001_nis  ...   263986560    232954397     PUBLIC           1  F380M;NRM
+1        HD-95086  233545519           JWST            image       jw01200002001_03102_00001_nis  ...  1504627200    232954396     PUBLIC           1  F380M;NRM
+2        HD-95086  159534944           JWST            image       jw01200002001_03103_00001_nis  ...    19290240    159513319     PUBLIC           1      F380M
+3        HD-93649  233595388           JWST            image       jw01200003001_03102_00001_nis  ...    26017920    233595388     PUBLIC           1  F480M;NRM
+4        HD-93649  233595389           JWST            image       jw01200003001_03103_00001_nis  ...    21372480    233595389     PUBLIC           1  F430M;NRM
+..            ...        ...            ...              ...                                 ...  ...         ...          ...        ...         ...        ...
+526  WISE-1738+27   87621090           JWST            image     jw02473074001_02101_00005_nrcb1  ...   293659200     87622652     PUBLIC           1      F150W
+527  WISE-1738+27   87621139           JWST            image     jw02473074001_02101_00005_nrcb2  ...   293659200     87622652     PUBLIC           1      F150W
+528  WISE-1738+27   87621099           JWST            image     jw02473074001_02101_00005_nrcb3  ...   293659200     87622652     PUBLIC           1      F150W
+529  WISE-1738+27   87621125           JWST            image     jw02473074001_02101_00005_nrcb4  ...   293659200     87622652     PUBLIC           1      F150W
+530  WISE-1738+27   87621135           JWST            image  jw02473074001_02101_00005_nrcblong  ...   293659200     87622666     PUBLIC           1      F480M
 
-[533 rows x 21 columns]
+[531 rows x 21 columns]
 ```
 
 ### Query by filter
@@ -78,21 +78,21 @@ We can include only the mid-IR filters to reduce the data volume significantly:
 ```console
 $ mastodown query --programs 01200 02473 --calib-level 1 --product-type SCIENCE --extension fits --filters F480M F430M F380M
 
-Final list contains 113 files with total size 32.38 Gb
-      target_name      obsID obs_collection dataproduct_type                              obs_id                                    description type  ... proposal_id                                productFilename       size parent_obsid dataRights calib_level    filters
-0    WISE-1738+27   87621103           JWST            image  jw02473074001_02101_00001_nrcblong  exposure (L1b): Uncalibrated 4D exposure data    S  ...        2473  jw02473074001_02101_00001_nrcblong_uncal.fits  293659200     87622666     PUBLIC           1      F480M
-1    WISE-1738+27   87621129           JWST            image  jw02473074001_02101_00004_nrcblong  exposure (L1b): Uncalibrated 4D exposure data    S  ...        2473  jw02473074001_02101_00004_nrcblong_uncal.fits  293659200     87622666     PUBLIC           1      F480M
-2    WISE-1738+27   87621135           JWST            image  jw02473074001_02101_00005_nrcblong  exposure (L1b): Uncalibrated 4D exposure data    S  ...        2473  jw02473074001_02101_00005_nrcblong_uncal.fits  293659200     87622666     PUBLIC           1      F480M
-3    WISE-1738+27   87621145           JWST            image  jw02473074001_02101_00002_nrcblong  exposure (L1b): Uncalibrated 4D exposure data    S  ...        2473  jw02473074001_02101_00002_nrcblong_uncal.fits  293659200     87622666     PUBLIC           1      F480M
-4    WISE-1738+27   87621150           JWST            image  jw02473074001_02101_00003_nrcblong  exposure (L1b): Uncalibrated 4D exposure data    S  ...        2473  jw02473074001_02101_00003_nrcblong_uncal.fits  293659200     87622666     PUBLIC           1      F480M
-..            ...        ...            ...              ...                                 ...                                            ...  ...  ...         ...                                            ...        ...          ...        ...         ...        ...
-108      HD-95086  233545572           JWST            image       jw01200003001_03104_00001_nis  exposure (L1b): Uncalibrated 4D exposure data    S  ...        1200       jw01200003001_03104_00001_nis_uncal.fits  472345920    232954396     PUBLIC           1  F380M;NRM
-109     HD-218396  233545572           JWST            image       jw01200003001_03104_00001_nis  exposure (L1b): Uncalibrated 4D exposure data    S  ...        1200       jw01200003001_03104_00001_nis_uncal.fits  472345920    232954397     PUBLIC           1  F380M;NRM
-110     HD-218396  233595304           JWST            image       jw01200001001_03102_00001_nis  exposure (L1b): Uncalibrated 4D exposure data    S  ...        1200       jw01200001001_03102_00001_nis_uncal.fits  263986560    232954397     PUBLIC           1  F380M;NRM
-111      HD-93649  233595388           JWST            image       jw01200003001_03102_00001_nis  exposure (L1b): Uncalibrated 4D exposure data    S  ...        1200       jw01200003001_03102_00001_nis_uncal.fits   26017920    233595388     PUBLIC           1  F480M;NRM
-112      HD-93649  233595389           JWST            image       jw01200003001_03103_00001_nis  exposure (L1b): Uncalibrated 4D exposure data    S  ...        1200       jw01200003001_03103_00001_nis_uncal.fits   21372480    233595389     PUBLIC           1  F430M;NRM
+Final list contains 111 files with total size 31.88 Gb
+      target_name      obsID obs_collection dataproduct_type                              obs_id  ...        size parent_obsid dataRights calib_level    filters
+0       HD-218396  233595304           JWST            image       jw01200001001_03102_00001_nis  ...   263986560    232954397     PUBLIC           1  F380M;NRM
+1        HD-95086  233545519           JWST            image       jw01200002001_03102_00001_nis  ...  1504627200    232954396     PUBLIC           1  F380M;NRM
+2        HD-95086  159534944           JWST            image       jw01200002001_03103_00001_nis  ...    19290240    159513319     PUBLIC           1      F380M
+3        HD-93649  233595388           JWST            image       jw01200003001_03102_00001_nis  ...    26017920    233595388     PUBLIC           1  F480M;NRM
+4        HD-93649  233595389           JWST            image       jw01200003001_03103_00001_nis  ...    21372480    233595389     PUBLIC           1  F430M;NRM
+..            ...        ...            ...              ...                                 ...  ...         ...          ...        ...         ...        ...
+106  WISE-1738+27   87621103           JWST            image  jw02473074001_02101_00001_nrcblong  ...   293659200     87622666     PUBLIC           1      F480M
+107  WISE-1738+27   87621145           JWST            image  jw02473074001_02101_00002_nrcblong  ...   293659200     87622666     PUBLIC           1      F480M
+108  WISE-1738+27   87621150           JWST            image  jw02473074001_02101_00003_nrcblong  ...   293659200     87622666     PUBLIC           1      F480M
+109  WISE-1738+27   87621129           JWST            image  jw02473074001_02101_00004_nrcblong  ...   293659200     87622666     PUBLIC           1      F480M
+110  WISE-1738+27   87621135           JWST            image  jw02473074001_02101_00005_nrcblong  ...   293659200     87622666     PUBLIC           1      F480M
 
-[113 rows x 21 columns]
+[111 rows x 21 columns]
 ```
 
 Note that we could also save the results of the query by adding the `-o <filename.csv>` flag.
@@ -113,25 +113,26 @@ To actually download the data, remove the `--dry-run` flag.
 ```console
 $ mastodown download --programs 01200 02473 --calib-level 1 --product-type SCIENCE --extension fits --filters F480M F430M F380M --download-dir data --dry-run
 
-Final list contains 113 files with total size 32.38 Gb
-      target_name      obsID obs_collection dataproduct_type                              obs_id                                    description type  ... proposal_id                                productFilename       size parent_obsid dataRights calib_level    filters
-0    WISE-1738+27   87621103           JWST            image  jw02473074001_02101_00001_nrcblong  exposure (L1b): Uncalibrated 4D exposure data    S  ...        2473  jw02473074001_02101_00001_nrcblong_uncal.fits  293659200     87622666     PUBLIC           1      F480M
-1    WISE-1738+27   87621129           JWST            image  jw02473074001_02101_00004_nrcblong  exposure (L1b): Uncalibrated 4D exposure data    S  ...        2473  jw02473074001_02101_00004_nrcblong_uncal.fits  293659200     87622666     PUBLIC           1      F480M
-2    WISE-1738+27   87621135           JWST            image  jw02473074001_02101_00005_nrcblong  exposure (L1b): Uncalibrated 4D exposure data    S  ...        2473  jw02473074001_02101_00005_nrcblong_uncal.fits  293659200     87622666     PUBLIC           1      F480M
-3    WISE-1738+27   87621145           JWST            image  jw02473074001_02101_00002_nrcblong  exposure (L1b): Uncalibrated 4D exposure data    S  ...        2473  jw02473074001_02101_00002_nrcblong_uncal.fits  293659200     87622666     PUBLIC           1      F480M
-4    WISE-1738+27   87621150           JWST            image  jw02473074001_02101_00003_nrcblong  exposure (L1b): Uncalibrated 4D exposure data    S  ...        2473  jw02473074001_02101_00003_nrcblong_uncal.fits  293659200     87622666     PUBLIC           1      F480M
-..            ...        ...            ...              ...                                 ...                                            ...  ...  ...         ...                                            ...        ...          ...        ...         ...        ...
-108      HD-95086  233545572           JWST            image       jw01200003001_03104_00001_nis  exposure (L1b): Uncalibrated 4D exposure data    S  ...        1200       jw01200003001_03104_00001_nis_uncal.fits  472345920    232954396     PUBLIC           1  F380M;NRM
-109     HD-218396  233545572           JWST            image       jw01200003001_03104_00001_nis  exposure (L1b): Uncalibrated 4D exposure data    S  ...        1200       jw01200003001_03104_00001_nis_uncal.fits  472345920    232954397     PUBLIC           1  F380M;NRM
-110     HD-218396  233595304           JWST            image       jw01200001001_03102_00001_nis  exposure (L1b): Uncalibrated 4D exposure data    S  ...        1200       jw01200001001_03102_00001_nis_uncal.fits  263986560    232954397     PUBLIC           1  F380M;NRM
-111      HD-93649  233595388           JWST            image       jw01200003001_03102_00001_nis  exposure (L1b): Uncalibrated 4D exposure data    S  ...        1200       jw01200003001_03102_00001_nis_uncal.fits   26017920    233595388     PUBLIC           1  F480M;NRM
-112      HD-93649  233595389           JWST            image       jw01200003001_03103_00001_nis  exposure (L1b): Uncalibrated 4D exposure data    S  ...        1200       jw01200003001_03103_00001_nis_uncal.fits   21372480    233595389     PUBLIC           1  F430M;NRM
+Final list contains 111 files with total size 31.88 Gb
+      target_name      obsID obs_collection dataproduct_type                              obs_id  ...        size parent_obsid dataRights calib_level    filters
+0       HD-218396  233595304           JWST            image       jw01200001001_03102_00001_nis  ...   263986560    232954397     PUBLIC           1  F380M;NRM
+1        HD-95086  233545519           JWST            image       jw01200002001_03102_00001_nis  ...  1504627200    232954396     PUBLIC           1  F380M;NRM
+2        HD-95086  159534944           JWST            image       jw01200002001_03103_00001_nis  ...    19290240    159513319     PUBLIC           1      F380M
+3        HD-93649  233595388           JWST            image       jw01200003001_03102_00001_nis  ...    26017920    233595388     PUBLIC           1  F480M;NRM
+4        HD-93649  233595389           JWST            image       jw01200003001_03103_00001_nis  ...    21372480    233595389     PUBLIC           1  F430M;NRM
+..            ...        ...            ...              ...                                 ...  ...         ...          ...        ...         ...        ...
+106  WISE-1738+27   87621103           JWST            image  jw02473074001_02101_00001_nrcblong  ...   293659200     87622666     PUBLIC           1      F480M
+107  WISE-1738+27   87621145           JWST            image  jw02473074001_02101_00002_nrcblong  ...   293659200     87622666     PUBLIC           1      F480M
+108  WISE-1738+27   87621150           JWST            image  jw02473074001_02101_00003_nrcblong  ...   293659200     87622666     PUBLIC           1      F480M
+109  WISE-1738+27   87621129           JWST            image  jw02473074001_02101_00004_nrcblong  ...   293659200     87622666     PUBLIC           1      F480M
+110  WISE-1738+27   87621135           JWST            image  jw02473074001_02101_00005_nrcblong  ...   293659200     87622666     PUBLIC           1      F480M
 
-[113 rows x 21 columns]
-Continue with download (dry run, no modifications will happen on disk)? [Y/n] Will download 113 data products
-Downloading file: data/02473/jw02473074001_02101_00001_nrcblong_uncal.fits
+[111 rows x 21 columns]
+Continue with download (dry run, no modifications will happen on disk)? [Y/n]   
+Will download 111 data products
+Downloading file: data/01200/jw01200001001_03102_00001_nis_uncal.fits
 [...]
-Downloaded 113 data products
+Downloaded 111 data products
 ```
 
 To view quick recipes for other use cases, see the {doc}`command line recipes <cli-recipes>`.
