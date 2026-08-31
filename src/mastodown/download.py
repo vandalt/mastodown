@@ -156,7 +156,6 @@ def download_products(
     return products
 
 
-# TODO: Check the link to download_products
 def download_product(
     product: Series,
     overwrite: bool = False,
@@ -182,7 +181,6 @@ def download_product(
             download_dir = "."
         download_dir = Path(download_dir)
         local_path = download_dir / product["productFilename"]
-    # TODO: Uniform/flexible keys for mission
     if local_path.exists() and not overwrite:
         logger.info("File %s already exists; skipping download", local_path)
         return local_path
@@ -196,7 +194,6 @@ def download_product(
 
     local_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # TODO: Decide on type/what to call for the download
     status, msg, _ = Observations.download_file(
         product["dataURI"], local_path=local_path, cache=not overwrite
     )
