@@ -1,13 +1,13 @@
-from argparse import ArgumentParser, Namespace
 import logging
+from argparse import ArgumentParser, Namespace
 from os import environ
 
 from astroquery.mast import Observations
 from pandas import DataFrame
 
+from mastodown._version import __version__
 from mastodown.download import download_products
 from mastodown.query import get_meta, query_obs
-from mastodown._version import __version__
 
 GET_META_DESCRIPTION = (
     "List metadata for all MAST observation columns. "
@@ -75,6 +75,11 @@ def add_query_arguments(parser: ArgumentParser, output_flags: tuple[str, ...]) -
         help="MAST instrument filters to include.",
     )
     parser.add_argument(
+        "--instrument-name",
+        nargs="+",
+        help="MAST instrument names to include (NIRISS/AMI, NIRISS/IMAGE, NIRCAM/IMAGE, etc.)",
+    )
+    parser.add_argument(
         "--date-range",
         nargs=2,
         metavar=("START_DATE", "END_DATE"),
@@ -115,6 +120,7 @@ def run_query(args: Namespace) -> DataFrame:
         product_type=args.product_type,
         extension=args.extension,
         filters=args.filters,
+        instrument_name=args.instrument_name,
         start_date=args.date_range[0] if args.date_range is not None else None,
         end_date=args.date_range[1] if args.date_range is not None else None,
         max_entries=args.max_entries,
