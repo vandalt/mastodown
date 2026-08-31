@@ -32,6 +32,22 @@ class CheckManifestTests(TestCase):
         self.assertEqual(products_to_download["obs_id"].tolist(), ["observation-1"])
         self.assertTrue(manifest.empty)
 
+    def test_logs_warning_when_manifest_product_is_missing_on_disk(self):
+        with TemporaryDirectory() as directory:
+            products = products_for(Path(directory))
+            manifest = DataFrame({"obs_id": ["observation-1"]})
+
+            with self.assertLogs("mastodown.download", level="WARNING") as logs:
+                check_manifest(products, manifest)
+
+        self.assertEqual(
+            logs.output,
+            [
+                "WARNING:mastodown.download:"
+                "1 files in the manifest are missing on disk; downloading them."
+            ],
+        )
+
 
 class DownloadProductsTests(TestCase):
     def test_target_directory_name_replaces_unsafe_path_characters(self):
@@ -63,15 +79,23 @@ class DownloadProductsTests(TestCase):
     def test_failed_download_is_not_added_to_manifest(self):
         with TemporaryDirectory() as directory:
             product = products_for(Path(directory)).drop(columns=["local_path"])
-            with patch(
-                "mastodown.download.Observations.download_file",
-                return_value=("ERROR", "download failed", None),
+            with (
+                patch(
+                    "mastodown.download.Observations.download_file",
+                    return_value=("ERROR", "download failed", None),
+                ),
+                self.assertLogs("mastodown.download", level="ERROR") as logs,
             ):
                 download_products(product, download_dir=directory, proposal_subdir=False)
 
             manifest_path = Path(directory) / "manifest.csv"
             self.assertTrue(manifest_path.exists())
             self.assertNotIn("observation-1", manifest_path.read_text())
+        self.assertIn(
+            "ERROR:mastodown.download:"
+            "Download failed for product",
+            logs.output[0],
+        )
 
     def test_dry_run_adds_planned_products_without_writing_manifest(self):
         with TemporaryDirectory() as directory:

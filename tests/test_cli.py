@@ -1,5 +1,6 @@
 from contextlib import redirect_stdout
 from io import StringIO
+import logging
 from os import environ
 from unittest import TestCase
 from unittest.mock import Mock, call, patch
@@ -7,10 +8,47 @@ from unittest.mock import Mock, call, patch
 from pandas import DataFrame
 
 from mastodown._version import __version__
-from mastodown.cli import main
+from mastodown.cli import configure_logging, main
 
 
 class RootCommandTests(TestCase):
+    def test_configure_logging_is_idempotent_and_leaves_astroquery_unchanged(self):
+        package_logger = logging.getLogger("mastodown")
+        astroquery_logger = logging.getLogger("astroquery")
+        original_handlers = package_logger.handlers.copy()
+        original_level = package_logger.level
+        original_propagate = package_logger.propagate
+        astroquery_configuration = (
+            astroquery_logger.level,
+            astroquery_logger.handlers.copy(),
+            astroquery_logger.propagate,
+        )
+        package_logger.handlers.clear()
+        try:
+            configure_logging()
+            configure_logging()
+
+            self.assertEqual(package_logger.level, logging.INFO)
+            self.assertFalse(package_logger.propagate)
+            self.assertEqual(len(package_logger.handlers), 1)
+            self.assertEqual(package_logger.handlers[0].level, logging.INFO)
+            self.assertEqual(
+                package_logger.handlers[0].formatter._fmt, "%(levelname)s: %(message)s"
+            )
+            self.assertEqual(
+                (
+                    astroquery_logger.level,
+                    astroquery_logger.handlers,
+                    astroquery_logger.propagate,
+                ),
+                astroquery_configuration,
+            )
+        finally:
+            package_logger.handlers.clear()
+            package_logger.handlers.extend(original_handlers)
+            package_logger.setLevel(original_level)
+            package_logger.propagate = original_propagate
+
     def test_version_prints_current_package_version(self):
         with (
             patch("sys.argv", ["mastodown", "--version"]),
@@ -267,9 +305,9 @@ class DownloadCommandTests(TestCase):
             patch("mastodown.cli.download_products") as download,
             patch("builtins.input", return_value="n"),
             patch("sys.argv", ["mastodown", "download"]),
-            redirect_stdout(StringIO()) as output,
+            self.assertLogs("mastodown.cli", level="INFO") as logs,
         ):
             main()
 
         download.assert_not_called()
-        self.assertIn("Download cancelled.", output.getvalue())
+        self.assertEqual(logs.output[-1], "INFO:mastodown.cli:Download cancelled.")

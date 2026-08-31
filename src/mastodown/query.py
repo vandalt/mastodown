@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timedelta
 
 from astropy.time import Time
@@ -5,10 +6,13 @@ from astroquery.exceptions import InvalidQueryError
 from astroquery.mast import MastMissions, Observations
 from pandas import DataFrame
 
+logger = logging.getLogger(__name__)
+
 
 def get_meta() -> None:
-    """Print metadata for all MAST observation columns."""
-    Observations.get_metadata("observations").pprint(max_lines=-1)
+    """Log metadata for all MAST observation columns."""
+    metadata = Observations.get_metadata("observations")
+    logger.info("%s", "\n".join(metadata.pformat(max_lines=-1)))
 
 
 def parse_date(date_string: str) -> datetime:
@@ -80,15 +84,16 @@ def query_obs(
             "obs_id",
             "calib_level",
         ]
-        print("Found the following observations:")
-        obs_tbl[display_columns].pprint(max_lines=-1)
+        logger.info(
+            "Found the following observations:\n%s",
+            "\n".join(obs_tbl[display_columns].pformat(max_lines=-1)),
+        )
 
     # Then we get all data products associated with the observations
     products_tbl = Observations.get_unique_product_list(obs_tbl)
 
     if verbose:
-        print("Found the following products before filtering:")
-        print(products_tbl)
+        logger.info("Found the following products before filtering:\n%s", products_tbl)
 
     # Then filter to keep science and/or auxiliary, pick the calib level and extension
     product_filters = {
@@ -138,9 +143,11 @@ def query_obs(
 
     products_df = products_df.sort_values("obs_id").reset_index(drop=True)
 
-    # Print final data before download
+    # Report the final data summary before download.
     total_size = products_df["size"].sum() / 1e9 if "size" in products_df else 0
     num_files = len(products_df)
-    print(f"Final list contains {num_files} files with total size {total_size:.2f} Gb")
+    logger.info(
+        "Final list contains %d files with total size %.2f Gb", num_files, total_size
+    )
 
     return products_df

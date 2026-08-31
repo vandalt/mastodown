@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 from re import sub
 
@@ -7,6 +8,7 @@ from astroquery.mast import (
 from pandas import DataFrame, Series, concat, read_csv
 
 PROG_ID_LEN = 5
+logger = logging.getLogger(__name__)
 
 
 def target_directory_name(target_name: str) -> str:
@@ -57,22 +59,24 @@ def check_manifest(
 
     n_missing_disk = len(products_in_manifest_not_disk)
     if n_missing_disk != 0:
-        # TODO: Use logging for all these warnings
-        print(
-            f"WARNING: There are {n_missing_disk} files in the manifest missing on disk. Downloading them."
+        logger.warning(
+            "%d files in the manifest are missing on disk; downloading them.",
+            n_missing_disk,
         )
 
     n_missing_manifest = len(products_not_manifest_on_disk)
     if n_missing_manifest != 0:
-        print(
-            f"WARNING: There are {n_missing_manifest} files on disk missing in the manifest. Adding them to the manifest."
+        logger.warning(
+            "%d files on disk are missing from the manifest; adding them to the manifest.",
+            n_missing_manifest,
         )
         manifest = update_manifest(manifest, products_not_manifest_on_disk)
 
     if overwrite and products_on_disk.any():
         n_on_disk = products_on_disk.sum()
-        print(
-            f"Overwrite is enabled. {n_on_disk} files already on disk will be re-downloaded."
+        logger.info(
+            "Overwrite is enabled; %d files already on disk will be re-downloaded.",
+            n_on_disk,
         )
     products_to_download = products[~products_on_disk | overwrite]
 
@@ -115,9 +119,9 @@ def download_products(
 
     manifest_path = download_dir / "manifest.csv"
     if manifest_path.exists():
-        print(f"Loading existing manifest from {manifest_path}")
+        logger.info("Loading existing manifest from %s", manifest_path)
         manifest = read_csv(manifest_path)
-        print(f"Found {len(manifest)} previously downloaded products")
+        logger.info("Found %d previously downloaded products", len(manifest))
     else:
         manifest = DataFrame()
 
@@ -126,7 +130,7 @@ def download_products(
     )
 
     num_files = len(products_to_download)
-    print(f"Will download {num_files} data products")
+    logger.info("Will download %d data products", num_files)
 
     successful_indices = []
     for index, product in products_to_download.iterrows():
@@ -139,14 +143,16 @@ def download_products(
     n_success = len(successful_indices)
     n_total = len(products_to_download)
     if n_success < n_total:
-        print(
-            f"WARNING: Download failed for {n_total - n_success} out of {n_total} products"
+        logger.warning(
+            "Download failed for %d out of %d products", n_total - n_success, n_total
         )
-    print(f"Downloaded {n_success} data products")
+    logger.info("Downloaded %d data products", n_success)
 
     if not dry_run:
         manifest.to_csv(manifest_path, index=False)
-        print(f"Saved manifest with {len(manifest)} data products to {manifest_path}")
+        logger.info(
+            "Saved manifest with %d data products to %s", len(manifest), manifest_path
+        )
     return products
 
 
@@ -178,12 +184,12 @@ def download_product(
         local_path = download_dir / product["productFilename"]
     # TODO: Uniform/flexible keys for mission
     if local_path.exists() and not overwrite:
-        print(f"File {local_path} already exists, skipping download")
+        logger.info("File %s already exists; skipping download", local_path)
         return local_path
     elif local_path.exists() and overwrite:
-        print(f"Overwriting existing file: {local_path}")
+        logger.info("Overwriting existing file: %s", local_path)
     else:
-        print(f"Downloading file: {local_path}")
+        logger.info("Downloading file: %s", local_path)
 
     if dry_run:
         return local_path
@@ -195,7 +201,12 @@ def download_product(
         product["dataURI"], local_path=local_path, cache=not overwrite
     )
     if status != "COMPLETE":
-        print(f"Download failed for product {local_path} with status {status}: {msg}")
+        logger.error(
+            "Download failed for product %s with status %s: %s",
+            local_path,
+            status,
+            msg,
+        )
         return False
 
     return local_path

@@ -1,4 +1,5 @@
 from argparse import ArgumentParser, Namespace
+import logging
 from os import environ
 
 from astroquery.mast import Observations
@@ -20,6 +21,29 @@ GET_META_COMMAND = "get-meta"
 QUERY_COMMAND = "query"
 DOWNLOAD_COMMAND = "download"
 COMMAND_NAMES = (GET_META_COMMAND, QUERY_COMMAND, DOWNLOAD_COMMAND)
+logger = logging.getLogger(__name__)
+PACKAGE_LOGGER_NAME = "mastodown"
+CLI_HANDLER_ATTRIBUTE = "_mastodown_cli_handler"
+LOG_FORMAT = "%(levelname)s: %(message)s"
+
+
+def configure_logging() -> None:
+    """Configure the Mastodown CLI logger without changing root logging."""
+    package_logger = logging.getLogger(PACKAGE_LOGGER_NAME)
+    package_logger.setLevel(logging.INFO)
+    package_logger.propagate = False
+
+    for handler in package_logger.handlers:
+        if getattr(handler, CLI_HANDLER_ATTRIBUTE, False):
+            handler.setLevel(logging.INFO)
+            handler.setFormatter(logging.Formatter(LOG_FORMAT))
+            return
+
+    handler = logging.StreamHandler()
+    setattr(handler, CLI_HANDLER_ATTRIBUTE, True)
+    handler.setLevel(logging.INFO)
+    handler.setFormatter(logging.Formatter(LOG_FORMAT))
+    package_logger.addHandler(handler)
 
 
 def add_query_arguments(parser: ArgumentParser, output_flags: tuple[str, ...]) -> None:
@@ -177,6 +201,7 @@ def create_parser() -> ArgumentParser:
 
 def main() -> None:
     """Run the mastodown command-line interface."""
+    configure_logging()
     parser = create_parser()
     args = parser.parse_args()
     if args.command is None:
@@ -201,4 +226,4 @@ def main() -> None:
                 dry_run=args.dry_run,
             )
         else:
-            print("Download cancelled.")
+            logger.info("Download cancelled.")
