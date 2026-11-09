@@ -7,6 +7,14 @@ from astroquery.mast import (
 )
 from pandas import DataFrame, Series, concat, read_csv
 
+__all__ = [
+    "check_manifest",
+    "download_product",
+    "download_products",
+    "target_directory_name",
+    "update_manifest",
+]
+
 PROG_ID_LEN = 5
 logger = logging.getLogger(__name__)
 
